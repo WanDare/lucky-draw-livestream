@@ -1,9 +1,7 @@
 import Phaser from "phaser";
 import { PrizeModel } from "./model/lucky_draw_model";
-import { LuckyDrawController } from "./controller/lucky_draw_controller";
 import { LuckyDrawView } from "./view/lucky_draw_view";
-
-/* -------------------------- PHASER SCENE -------------------------- */
+import { LuckyDrawController } from "./controller/lucky_draw_controller";
 
 export default class LuckyDrawScene extends Phaser.Scene {
   private model!: PrizeModel;
@@ -24,8 +22,11 @@ export default class LuckyDrawScene extends Phaser.Scene {
   create() {
     const centerX = this.cameras.main.centerX;
     const centerY = this.cameras.main.centerY;
+    this.input.setDefaultCursor(
+      "url('/assets/images/cursor_hand.png'), pointer"
+    );
 
-    this.view.createLayout(centerX, centerY); 
+    this.view.createLayout(centerX, centerY);
 
     this.controller = new LuckyDrawController(this.model, this.view, this);
   }

@@ -17,7 +17,6 @@ export default class LoadingScene extends Phaser.Scene {
     this.progressBox.fillStyle(0x222222, 0.8);
     this.progressBox.fillRect(width / 2 - 170, height / 2 - 30, 340, 60);
 
-    // Loading text
     this.loadingText = this.make
       .text({
         x: width / 2,
@@ -31,7 +30,6 @@ export default class LoadingScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
-    // Percent text
     this.percentText = this.make
       .text({
         x: width / 2,
@@ -45,10 +43,8 @@ export default class LoadingScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
-    // Progress bar
     this.progressBar = this.add.graphics();
 
-    // Listen to progress
     this.load.on("progress", (value: number) => {
       this.progressBar.clear();
       this.progressBar.fillStyle(0x03792a, 1);
@@ -66,10 +62,12 @@ export default class LoadingScene extends Phaser.Scene {
       this.progressBox.destroy();
       this.loadingText.destroy();
       this.percentText.destroy();
-      // Add a short delay for smoothness, then start main game
+
       this.time.delayedCall(250, () => {
-        this.scene.start("SpinScene");
+        this.scene.start("LuckyDrawScene");
       });
     });
+
+    // this.load.image('logo', 'assets/logo.png');
   }
 }

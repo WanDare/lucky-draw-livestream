@@ -7,7 +7,7 @@ const config: Phaser.Types.Core.GameConfig = {
   width: 1440,
   height: 1024,
   backgroundColor: "#538b3c",
-  scene: [LuckyDrawScene],
+  scene: [LuckyDrawScene, LoadingScene],
   parent: "game",
 };
 
