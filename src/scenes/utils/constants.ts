@@ -1,1 +1,1 @@
-export const PRIZES_API = import.meta.env.VITE_API_URL as string;
+export const API_BASE_URL = import.meta.env.VITE_API_URL as string;

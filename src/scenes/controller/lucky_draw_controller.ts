@@ -1,4 +1,4 @@
-import { PRIZES_API } from "../utils/constants";
+import { API_BASE_URL } from "../utils/constants";
 import type { PrizeModel, PrizeInfo } from "../model/lucky_draw_model";
 import type { LuckyDrawView } from "../view/lucky_draw_view";
 
@@ -12,6 +12,12 @@ export class LuckyDrawController {
     { count: 15, label: "Stage 1: Collect 15 Ticket" },
     { count: 9, label: "Stage 2: Collect 9 Ticket" },
     { count: 6, label: "Final Stage: Collect 6 Ticket" },
+  ];
+
+  stagePrizes = [
+    { image: "Prize", name: "Sakkin Aajiro Small Box", value: "34 ​​រង្វាន់" },
+    { image: "Prize2", name: "Sakkin Aajiro Box", value: "24 ​រង្វាន់" },
+    { image: "Prize3", name: "$10 Gift Card", value: "12 ​​រង្វាន់" },
   ];
   private currentStage = 0;
   private maxCollect = 0;
@@ -33,23 +39,37 @@ export class LuckyDrawController {
     };
   }
 
+  clearAllBalls() {
+    this.ballPairs.forEach((pair) => {
+      if (pair.tween && pair.tween.isPlaying()) {
+        pair.tween.stop();
+      }
+      if (pair.ball && pair.ball.active) {
+        pair.ball.destroy();
+      }
+    });
+    this.ballPairs = [];
+  }
+
   onStartGame() {
     this.currentStage = 0;
     this.startStage(this.currentStage);
   }
 
   startStage(stageIdx: number) {
+    this.clearAllBalls();
+
     this.model.clearPrizes();
     this.view.renderPrizePanel(this.model.getPrizes());
-
     this.maxCollect = this.stages[stageIdx].count;
     this.view.showStageLabel?.(this.stages[stageIdx].label);
-    this.view.showGameScreen(() => this.dropBalls(this.maxCollect * 7));
+    this.view.showGameScreen(() => this.dropBalls(this.maxCollect * 20));
+    this.view.showStagePrize(this.stagePrizes[stageIdx]);
   }
 
   async fetchRandomPrizeInfo(): Promise<PrizeInfo> {
     const res = await fetch(
-      `${PRIZES_API}/064452bf-cb44-41ff-babb-824d7051cfde`
+      `${API_BASE_URL}/064452bf-cb44-41ff-babb-824d7051cfde`
     );
     if (!res.ok) throw new Error("Failed to fetch prize info");
     const data = await res.json();
@@ -74,7 +94,7 @@ export class LuckyDrawController {
         targets: ball,
         y: 1000,
         ease: "Sine.easeInOut",
-        duration: Phaser.Math.Between(15000, 4500),
+        duration: Phaser.Math.Between(25000, 4500),
         delay: Phaser.Math.Between(0, 700),
         onComplete: () => {
           this.ballPairs = this.ballPairs.filter((pair) => pair.ball !== ball);
@@ -166,13 +186,18 @@ export class LuckyDrawController {
   }
 
   onStageComplete() {
-    this.currentStage += 1;
-    if (this.currentStage < this.stages.length) {
-      this.view.showStageComplete?.(() => {
+    this.clearAllBalls();
+    const prizesThisStage = this.model.getPrizes();
+
+    // Show the winner panel (collected prizes/winners)
+    this.view.showStageWinnersPanel(prizesThisStage, () => {
+      this.currentStage += 1;
+      if (this.currentStage < this.stages.length) {
+        this.model.clearPrizes();
         this.startStage(this.currentStage);
-      });
-    } else {
-      this.view.showGameComplete?.();
-    }
+      } else {
+        this.view.showGameComplete?.();
+      }
+    });
   }
 }

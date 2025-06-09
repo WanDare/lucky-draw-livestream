@@ -1,5 +1,12 @@
 import Phaser from "phaser";
 import type { PrizeInfo } from "../model/lucky_draw_model";
+import { launchConfetti } from "../effects/confetti";
+
+export type StagePrizeConfig = {
+  image: string;
+  name: string;
+  value: string;
+};
 
 export class LuckyDrawView {
   scene: Phaser.Scene;
@@ -7,13 +14,14 @@ export class LuckyDrawView {
   background1!: Phaser.GameObjects.Image;
   background2!: Phaser.GameObjects.Image;
   gamescreen!: Phaser.GameObjects.Image | null;
-  bubblegun!: Phaser.GameObjects.Image | null;
   prizenet!: Phaser.GameObjects.Image | null;
   thumbnail!: Phaser.GameObjects.Image;
   prizeitem!: Phaser.GameObjects.Image;
+  displayprize!: Phaser.GameObjects.Image;
   transitionOverlay!: Phaser.GameObjects.Rectangle | null;
   collectedPrizeGraphics: Phaser.GameObjects.Container[] = [];
   private _congratsPopup?: Phaser.GameObjects.GameObject[];
+  private stagePrizeGraphics: Phaser.GameObjects.GameObject[] = [];
   onStart?: () => void;
   onPopupClosed?: () => void;
 
@@ -23,11 +31,10 @@ export class LuckyDrawView {
 
   preload() {
     const images = [
-      ["background1", "assets/images/luckygame.png"],
-      ["background2", "assets/images/streaming.png"],
+      ["background1", "assets/images/poster_thumbnail.png"],
+      ["background2", "assets/images/streaming_bg.png"],
       ["Thumbnail", "assets/images/thumbnail.png"],
-      ["Gamescreen", "assets/images/game_screen.png"],
-      ["Bubblegun", "assets/images/bubble_gun.png"],
+      ["Gamescreen", "assets/images/lucky_game_bg.png"],
       ["Start", "assets/images/start_button.png"],
       ["Opennet", "assets/images/open_net.png"],
       ["Net", "assets/images/net.png"],
@@ -35,7 +42,8 @@ export class LuckyDrawView {
       ["Prizenet", "assets/images/prize_net.png"],
       ["Ball", "assets/images/ball_prize.png"],
       ["Congrat", "assets/images/popup_winner.png"],
-      // <=== Prize Item ===>
+      ["Displayprize", "assets/images/display_prize.png"],
+      // Prize images
       ["Prize", "assets/images/prizes/prize7.png"],
       ["Prize2", "assets/images/prizes/prize6.png"],
       ["Prize3", "assets/images/prizes/prize5.png"],
@@ -73,7 +81,6 @@ export class LuckyDrawView {
       });
 
     this.gamescreen = null;
-    this.bubblegun = null;
     this.prizenet = null;
 
     this.transitionOverlay = this.scene.add
@@ -83,6 +90,260 @@ export class LuckyDrawView {
 
     this.startButton.on("pointerdown", () => {
       if (this.onStart) this.onStart();
+    });
+  }
+
+  showStagePrize(prizeConfig: { image: string; name: string; value: string }) {
+    this.stagePrizeGraphics.forEach((g) => g.destroy());
+    this.stagePrizeGraphics = [];
+
+    const centerX = this.background2.x;
+    const topY = this.background2.y - this.background2.displayHeight / 2 + 30;
+
+    // --- 1. Displayprize background ---
+    const displayPrizeBg = this.scene.add
+      .image(centerX, topY + 110, "Displayprize")
+      .setOrigin(0.5, 0)
+      .setDisplaySize(345, 114)
+      .setAlpha(0)
+      .setDepth(this.background2.depth + 1);
+
+    // --- 2. Prize image ---
+    const prizeImg = this.scene.add
+      .image(centerX, topY + 42, prizeConfig.image)
+      .setOrigin(0.5, 0)
+      .setDisplaySize(163, 95)
+      .setAlpha(0)
+      .setDepth(this.background2.depth + 2);
+
+    // --- 3. Mini Card for Prize Name and Value ---
+    const cardWidth = 200;
+    const cardHeight = 64;
+    const borderRadius = 14;
+    const cardY = topY + 160;
+
+    const cardBg = this.scene.add.graphics();
+    cardBg.lineStyle(3, 0xf9ffb2, 0.85);
+    cardBg.strokeRoundedRect(
+      -cardWidth / 2,
+      -cardHeight / 2,
+      cardWidth,
+      cardHeight,
+      borderRadius
+    );
+    cardBg.fillStyle(0x214e16, 1);
+    cardBg.fillRoundedRect(
+      -cardWidth / 2,
+      -cardHeight / 2,
+      cardWidth,
+      cardHeight,
+      borderRadius
+    );
+    cardBg.setPosition(centerX, cardY);
+    cardBg.setAlpha(0);
+    cardBg.setDepth(this.background2.depth + 3);
+
+    const nameText = this.scene.add
+      .text(0, 25, prizeConfig.name, {
+        font: "bold 12px Arial",
+        color: "#ffffff",
+        align: "center",
+        fontStyle: "bold",
+      })
+      .setOrigin(0.5);
+
+    const valueText = this.scene.add
+      .text(0, 45, prizeConfig.value, {
+        font: "bold 12px Arial",
+        color: "#FFD700",
+        align: "center",
+        fontStyle: "bold",
+      })
+      .setOrigin(0.5);
+
+    const cardContainer = this.scene.add.container(centerX, cardY, [
+      cardBg,
+      nameText,
+      valueText,
+    ]);
+    cardContainer.setDepth(this.background2.depth + 4);
+    cardContainer.setScale(0.7).setAlpha(0);
+
+    this.scene.tweens.add({
+      targets: displayPrizeBg,
+      alpha: 1,
+      duration: 350,
+      ease: "Back.Out",
+    });
+    this.scene.tweens.add({
+      targets: prizeImg,
+      alpha: 1,
+      y: topY + 35,
+      duration: 360,
+      delay: 100,
+      ease: "Back.Out",
+    });
+    this.scene.tweens.add({
+      targets: cardContainer,
+      alpha: 1,
+      scale: 1,
+      duration: 350,
+      delay: 180,
+      ease: "Back.Out",
+    });
+    this.scene.tweens.add({
+      targets: cardBg,
+      alpha: 1,
+      duration: 350,
+      delay: 180,
+      ease: "Back.Out",
+    });
+
+    this.stagePrizeGraphics.push(
+      displayPrizeBg,
+      prizeImg,
+      cardContainer,
+      cardBg
+    );
+  }
+
+  showStageWinnersPanel(prizes: PrizeInfo[], onNext: () => void) {
+    this.stagePrizeGraphics.forEach((g) => g.destroy());
+    this.stagePrizeGraphics = [];
+
+    const { width, height } = this.scene.scale;
+    // Make panel much bigger
+    const panelWidth = 850;
+    const panelHeight = 850;
+
+    const overlay = this.scene.add
+      .rectangle(width / 2, height / 2, width, height, 0x000000, 0.75)
+      .setDepth(300)
+      .setAlpha(0);
+
+    const panelRadius = 32;
+    const panelGraphics = this.scene.add.graphics();
+    panelGraphics.fillStyle(0x222b1c, 1);
+    panelGraphics.lineStyle(3, 0xf9ffb2, 1);
+    panelGraphics.strokeRoundedRect(0, 0, panelWidth, panelHeight, panelRadius);
+    panelGraphics.fillRoundedRect(0, 0, panelWidth, panelHeight, panelRadius);
+
+    // Generate texture and create image
+    const panelTexKey = "stageWinnersPanelBg";
+    panelGraphics.generateTexture(panelTexKey, panelWidth, panelHeight);
+    panelGraphics.destroy();
+
+    const panel = this.scene.add
+      .image(width / 2, height / 2, panelTexKey)
+      .setDisplaySize(panelWidth, panelHeight)
+      .setDepth(301)
+      .setAlpha(0);
+
+    // Title higher up
+    const title = this.scene.add
+      .text(width / 2, height / 2 - panelHeight / 2 + 50, "Stage Winners", {
+        font: "bold 40px Arial",
+        color: "#FFD700",
+        align: "center",
+      })
+      .setOrigin(0.5)
+      .setDepth(302)
+      .setAlpha(0);
+
+    // ---- GRID LOGIC ----
+    const columns = 3;
+    const cardSpacingX = 250;
+    const cardSpacingY = 85;
+    const gridTotalWidth = cardSpacingX * (columns - 1);
+    const startX = width / 2 - gridTotalWidth / 2;
+    const startY = height / 2 - 160;
+
+    const container = this.scene.add.container(0, 0).setDepth(303).setAlpha(0);
+
+    prizes.forEach((prize, idx) => {
+      const col = idx % columns;
+      const row = Math.floor(idx / columns);
+      const x = startX + col * cardSpacingX;
+      const y = startY + row * cardSpacingY;
+      const card = this.createPrizeCard(x, y, prize);
+      container.add(card);
+    });
+
+    // Next button lower down
+    const nextBtnY = height / 2 + panelHeight / 2 - 54;
+    // Use graphics for rounded rectangle button
+    const nextBtnGraphics = this.scene.add.graphics();
+    const btnWidth = 210;
+    const btnHeight = 62;
+    const btnRadius = 18;
+    nextBtnGraphics.fillStyle(0xf9ffb2, 1);
+    nextBtnGraphics.fillRoundedRect(
+      -btnWidth / 2,
+      -btnHeight / 2,
+      btnWidth,
+      btnHeight,
+      btnRadius
+    );
+    nextBtnGraphics.lineStyle(3, 0x214e16, 1);
+    nextBtnGraphics.strokeRoundedRect(
+      -btnWidth / 2,
+      -btnHeight / 2,
+      btnWidth,
+      btnHeight,
+      btnRadius
+    );
+    nextBtnGraphics.setPosition(width / 2, nextBtnY);
+    nextBtnGraphics.setDepth(304).setAlpha(0);
+
+    // Use a transparent rectangle for interaction
+    const nextBtn = this.scene.add
+      .rectangle(width / 2, nextBtnY, btnWidth, btnHeight, 0x000000, 0)
+      .setDepth(305)
+      .setAlpha(0)
+      .setInteractive({ useHandCursor: true });
+
+    const nextText = this.scene.add
+      .text(width / 2, nextBtnY, "Next", {
+      font: "bold 32px Arial",
+      color: "#214e16",
+      align: "center",
+      })
+      .setOrigin(0.5)
+      .setDepth(306)
+      .setAlpha(0);
+
+    this.scene.tweens.add({
+      targets: [overlay, panel, title, container, nextBtnGraphics, nextBtn, nextText],
+      alpha: 1,
+      duration: 350,
+      ease: "Back.Out",
+    });
+
+    this.stagePrizeGraphics.push(
+      overlay,
+      panel,
+      title,
+      container,
+      nextBtnGraphics,
+      nextBtn,
+      nextText
+    );
+    container.iterate((child: any) => this.stagePrizeGraphics.push(child));
+
+    nextBtn.on("pointerdown", () => {
+      this.scene.tweens.add({
+      targets: [overlay, panel, title, container, nextBtnGraphics, nextBtn, nextText],
+      alpha: 0,
+      duration: 250,
+      onComplete: () => {
+        [overlay, panel, title, container, nextBtnGraphics, nextBtn, nextText].forEach((g) =>
+        g.destroy()
+        );
+        container.removeAll(true);
+        this.stagePrizeGraphics = [];
+        if (onNext) onNext();
+      },
+      });
     });
   }
 
@@ -111,33 +372,11 @@ export class LuckyDrawView {
           ease: "Quad.easeIn",
         });
 
-        this.bubblegun = this.scene.add
-          .image(360, 860, "Bubblegun")
-          .setOrigin(0.5)
-          .setDisplaySize(0, 0)
-          .setDepth(2);
-
         this.prizenet = this.scene.add
-          .image(360, 200, "Prizenet")
+          .image(360, 150, "Prizenet")
           .setOrigin(0.5)
           .setDisplaySize(790, 660)
           .setDepth(3);
-
-        // this.scene.tweens.add({
-        //   targets: this.bubblegun,
-        //   displayWidth: 183,
-        //   displayHeight: 214,
-        //   duration: 450,
-        //   ease: "Back.Out",
-        //   onComplete: () => {
-        //     this.scene.tweens.add({
-        //       targets: this.transitionOverlay,
-        //       alpha: 0,
-        //       duration: 200,
-        //       onComplete: dropBalls,
-        //     });
-        //   },
-        // });
 
         this.scene.tweens.add({
           targets: this.transitionOverlay,
@@ -226,6 +465,13 @@ export class LuckyDrawView {
       alpha: 1,
       duration: 350,
       ease: "Quad.easeIn",
+      onComplete: () => {
+        launchConfetti(this.scene, { x: 720, y: 512, amount: 70 });
+        // Optional: Repeat confetti a couple of times for extra celebration
+        this.scene.time.delayedCall(600, () => {
+          launchConfetti(this.scene, { x: 720, y: 412, amount: 48 });
+        });
+      },
     });
   }
 
