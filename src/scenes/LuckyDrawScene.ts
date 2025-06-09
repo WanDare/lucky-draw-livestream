@@ -22,9 +22,9 @@ export default class LuckyDrawScene extends Phaser.Scene {
   create() {
     const centerX = this.cameras.main.centerX;
     const centerY = this.cameras.main.centerY;
-    this.input.setDefaultCursor(
-      "url('/assets/images/cursor_hand.png'), pointer"
-    );
+    // this.input.setDefaultCursor(
+    //   "url('/assets/images/cursor_hand.png'), pointer"
+    // );
 
     this.view.createLayout(centerX, centerY);
 
