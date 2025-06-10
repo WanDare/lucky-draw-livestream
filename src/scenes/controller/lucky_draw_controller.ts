@@ -9,9 +9,9 @@ export class LuckyDrawController {
   private isCollectingPrize = false;
 
   private stages = [
-    { count: 15, label: "Stage 1: Collect 15 Ticket" },
-    { count: 9, label: "Stage 2: Collect 9 Ticket" },
-    { count: 6, label: "Final Stage: Collect 6 Ticket" },
+    { count: 6, label: "Stage 1: Collect 15 Ticket" },
+    { count: 3, label: "Stage 2: Collect 9 Ticket" },
+    { count: 2, label: "Final Stage: Collect 6 Ticket" },
   ];
 
   stagePrizes = [
@@ -19,6 +19,7 @@ export class LuckyDrawController {
     { image: "Prize2", name: "Sakkin Aajiro Box", value: "24 ​រង្វាន់" },
     { image: "Prize3", name: "$10 Gift Card", value: "12 ​​រង្វាន់" },
   ];
+
   private currentStage = 0;
   private maxCollect = 0;
 
@@ -26,6 +27,9 @@ export class LuckyDrawController {
     ball: Phaser.GameObjects.Image;
     tween: Phaser.Tweens.Tween;
   }[] = [];
+
+  private ballSpawnTimer?: Phaser.Time.TimerEvent;
+  private maxBallsOnScreen = 20;
 
   constructor(model: PrizeModel, view: LuckyDrawView, scene: Phaser.Scene) {
     this.model = model;
@@ -49,11 +53,16 @@ export class LuckyDrawController {
       }
     });
     this.ballPairs = [];
+
+    if (this.ballSpawnTimer) {
+      this.ballSpawnTimer.remove(false);
+      this.ballSpawnTimer = undefined;
+    }
   }
 
   onStartGame() {
     this.currentStage = 0;
-    this.startStage(this.currentStage);
+    this.curtainStageTransition(() => this.startStage(this.currentStage));
   }
 
   startStage(stageIdx: number) {
@@ -63,7 +72,8 @@ export class LuckyDrawController {
     this.view.renderPrizePanel(this.model.getPrizes());
     this.maxCollect = this.stages[stageIdx].count;
     this.view.showStageLabel?.(this.stages[stageIdx].label);
-    this.view.showGameScreen(() => this.dropBalls(this.maxCollect * 20));
+
+    this.view.showGameScreen(() => this.startInfiniteBallDrop());
     this.view.showStagePrize(this.stagePrizes[stageIdx]);
   }
 
@@ -79,49 +89,89 @@ export class LuckyDrawController {
     return data as PrizeInfo;
   }
 
-  dropBalls(count: number = 10) {
-    for (let i = 0; i < count; i++) {
-      const x = Phaser.Math.Between(20, 675);
-      const y = -40;
-      const ball = this.scene.add
-        .image(x, y, "Ball")
-        .setOrigin(0.5)
-        .setDisplaySize(250, 250)
-        .setDepth(5)
-        .setInteractive({ useHandCursor: true });
-
-      const ballTween = this.scene.tweens.add({
-        targets: ball,
-        y: 1000,
-        ease: "Sine.easeInOut",
-        duration: Phaser.Math.Between(25000, 4500),
-        delay: Phaser.Math.Between(0, 700),
-        onComplete: () => {
-          this.ballPairs = this.ballPairs.filter((pair) => pair.ball !== ball);
-          if (ball.active) ball.destroy();
-        },
-      });
-
-      this.ballPairs.push({ ball, tween: ballTween });
-
-      ball.on("pointerdown", async () => {
-        if (
-          this.isCollectingPrize ||
-          this.model.getPrizes().length >= this.maxCollect
-        )
-          return;
-        this.isCollectingPrize = true;
-        ball.disableInteractive();
-        try {
-          const prize = await this.fetchRandomPrizeInfo();
-          this.collectPrizeWithAnimation(ball, prize);
-        } catch (e) {
-          ball.setInteractive({ useHandCursor: true });
-          this.isCollectingPrize = false;
-          console.error("Prize fetch failed", e);
-        }
-      });
+  startInfiniteBallDrop() {
+    if (this.ballSpawnTimer) {
+      this.ballSpawnTimer.remove(false);
+      this.ballSpawnTimer = undefined;
     }
+
+    const spawnBalls = () => {
+      if (this.model.getPrizes().length >= this.maxCollect) {
+        if (this.ballSpawnTimer) {
+          this.ballSpawnTimer.remove(false);
+          this.ballSpawnTimer = undefined;
+        }
+        return;
+      }
+
+      while (
+        this.ballPairs.length < this.maxBallsOnScreen &&
+        this.model.getPrizes().length < this.maxCollect
+      ) {
+        this.spawnBall();
+      }
+
+      this.scene.time.addEvent({
+        delay: 0,
+        callback: spawnBalls,
+      });
+    };
+
+    spawnBalls();
+  }
+
+  spawnBall() {
+    // Randomize starting X position
+    const x = Phaser.Math.Between(20, 675);
+    const y = -40;
+
+    // Create the ticket (ball) image
+    const ball = this.scene.add
+      .image(x, y, "Ball")
+      .setOrigin(0.5)
+      .setDisplaySize(70, 70)
+      .setDepth(2)
+      .setInteractive({ useHandCursor: true });
+
+    // --- NEW: Set a random initial rotation ---
+    // Gives each ticket a slightly different starting angle.
+    ball.setAngle(Phaser.Math.Between(-45, 45));
+
+    // Animate the ticket falling
+    const ballTween = this.scene.tweens.add({
+      targets: ball,
+      y: 1000, // Target Y position (off-screen)
+
+      angle: Phaser.Math.Between(-270, 270),
+
+      ease: "Sine.easeInOut",
+      duration: Phaser.Math.Between(8500, 15000),
+      delay: Phaser.Math.Between(0, 700),
+      onComplete: () => {
+        this.ballPairs = this.ballPairs.filter((pair) => pair.ball !== ball);
+        if (ball.active) ball.destroy();
+      },
+    });
+
+    this.ballPairs.push({ ball, tween: ballTween });
+
+    ball.on("pointerdown", async () => {
+      if (
+        this.isCollectingPrize ||
+        this.model.getPrizes().length >= this.maxCollect
+      )
+        return;
+      this.isCollectingPrize = true;
+      ball.disableInteractive();
+      try {
+        const prize = await this.fetchRandomPrizeInfo();
+        this.collectPrizeWithAnimation(ball, prize);
+      } catch (e) {
+        ball.setInteractive({ useHandCursor: true });
+        this.isCollectingPrize = false;
+        console.error("Prize fetch failed", e);
+      }
+    });
   }
 
   collectPrizeWithAnimation(ball: Phaser.GameObjects.Image, prize: PrizeInfo) {
@@ -134,7 +184,7 @@ export class LuckyDrawController {
     const flyBall = this.scene.add
       .image(ball.x, ball.y, "Ball")
       .setOrigin(0.5)
-      .setDisplaySize(90, 90)
+      .setDisplaySize(70, 70)
       .setDepth(20);
 
     this.scene.tweens.add({
@@ -185,19 +235,28 @@ export class LuckyDrawController {
     });
   }
 
+  // ----------- THE KEY FUNCTION FOR CURTAIN TRANSITIONS -----------
   onStageComplete() {
     this.clearAllBalls();
     const prizesThisStage = this.model.getPrizes();
 
-    // Show the winner panel (collected prizes/winners)
     this.view.showStageWinnersPanel(prizesThisStage, () => {
       this.currentStage += 1;
       if (this.currentStage < this.stages.length) {
         this.model.clearPrizes();
-        this.startStage(this.currentStage);
+        this.curtainStageTransition(() => this.startStage(this.currentStage));
       } else {
-        this.view.showGameComplete?.();
+        this.curtainStageTransition(() => {
+          this.view.showGameComplete?.();
+        });
       }
+    });
+  }
+
+  private curtainStageTransition(action: () => void) {
+    this.view.closeCurtain(() => {
+      action();
+      this.view.openCurtain();
     });
   }
 }

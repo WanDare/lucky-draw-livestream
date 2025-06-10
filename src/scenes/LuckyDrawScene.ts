@@ -27,7 +27,6 @@ export default class LuckyDrawScene extends Phaser.Scene {
     // );
 
     this.view.createLayout(centerX, centerY);
-
     this.controller = new LuckyDrawController(this.model, this.view, this);
   }
 }
