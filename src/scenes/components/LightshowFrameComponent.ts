@@ -34,7 +34,7 @@ export class LightshowFrameComponent {
 
     // Animate the frame every 70ms (about 14fps)
     const timer = scene.time.addEvent({
-      delay: 300,
+      delay: 500,
       loop: true,
       callback: () => {
         frameIdx = (frameIdx + 1) % frames.length;

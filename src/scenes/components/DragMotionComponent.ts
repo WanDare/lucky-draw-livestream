@@ -2,7 +2,7 @@
 import Phaser from "phaser";
 
 type OnDropCallback = () => void;
-type OnDragCallback = (progress: number) => void; 
+type OnDragCallback = (progress: number) => void;
 export class DragMotionComponent {
   static create(
     scene: Phaser.Scene,
@@ -39,7 +39,7 @@ export class DragMotionComponent {
     let dragStartY = y;
     let hasDropped = false;
     const dragMaxDistance = 30;
-    const dropThreshold = 48; 
+    const dropThreshold = 48;
 
     dragImage.on("dragstart", (_pointer: Phaser.Input.Pointer) => {
       dragStartY = dragImage.y;
@@ -56,8 +56,17 @@ export class DragMotionComponent {
       "drag",
       (_pointer: Phaser.Input.Pointer, _dragX: number, dragY: number) => {
         if (hasDropped) return;
-        const maxY = dragStartY + 80; 
+        const maxY = dragStartY + 80;
         dragImage.y = Phaser.Math.Clamp(dragY, dragStartY, maxY);
+
+        const progress = Phaser.Math.Clamp(
+          (dragImage.y - dragStartY) / (maxY - dragStartY),
+          0,
+          1
+        );
+        if (options.onDragProgress) {
+          options.onDragProgress(progress);
+        }
       }
     );
 

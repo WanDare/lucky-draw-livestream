@@ -9,16 +9,16 @@ export class WinnerPanelComponent {
     prizes: PrizeInfo[],
     onNext: () => void
   ): Phaser.GameObjects.GameObject[] {
-    const panelX = 360;
+    const panelX = 720;
     const panelY = 512;
-    const panelWidth = 720;
+    const panelWidth = 1440;
     const panelHeight = 1024;
 
     const blurImage = scene.add
       .image(panelX, panelY, "winner_blur_bg")
       .setOrigin(0.5)
       .setDisplaySize(panelWidth, panelHeight)
-      .setDepth(1299) 
+      .setDepth(1299)
       .setAlpha(1);
 
     const title = scene.add

@@ -33,7 +33,7 @@ export class PrizeCardComponent {
 
     const nameText = scene.add
       .text(0, -13, prize.name, {
-        font: "bold 18px Arial",
+        font: "bold 16px Poppins",
         color: "#ffffff",
         align: "center",
         fontStyle: "bold",
@@ -42,18 +42,14 @@ export class PrizeCardComponent {
 
     const phoneText = scene.add
       .text(0, 15, prize.phone, {
-        font: "bold 20px Arial",
+        font: "bold 20px Poppins",
         color: "#ffffff",
         align: "center",
         fontStyle: "bold",
       })
       .setOrigin(0.5);
 
-    const container = scene.add.container(x, y, [
-      cardBg,
-      nameText,
-      phoneText,
-    ]);
+    const container = scene.add.container(x, y, [cardBg, nameText, phoneText]);
     container.setDepth(22);
 
     container.setScale(0.7).setAlpha(0);
