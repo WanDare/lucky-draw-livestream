@@ -1,4 +1,3 @@
-// components/StagePrizeDisplayComponent.ts
 import Phaser from "phaser";
 
 export type StagePrizeConfig = {
@@ -24,9 +23,9 @@ export class StagePrizeDisplayComponent {
       .setDepth(background2.depth + 1);
 
     const prizeImg = scene.add
-      .image(centerX, topY + 42, prizeConfig.image)
+      .image(centerX, 220, prizeConfig.image)
       .setOrigin(0.5, 0)
-      .setDisplaySize(163, 95)
+      .setDisplaySize(176, 135)
       .setAlpha(0)
       .setDepth(background2.depth + 2);
 
@@ -66,9 +65,9 @@ export class StagePrizeDisplayComponent {
       .setOrigin(0.5);
 
     const valueText = scene.add
-      .text(0, 45, prizeConfig.value, {
+      .text(0, 45, prizeConfig.value.toUpperCase(), {
         font: "bold 12px Arial",
-        color: "#FFD700",
+        color: "#ffffff",
         align: "center",
         fontStyle: "bold",
       })
@@ -82,7 +81,6 @@ export class StagePrizeDisplayComponent {
     cardContainer.setDepth(background2.depth + 4);
     cardContainer.setScale(0.7).setAlpha(0);
 
-    // Animations
     scene.tweens.add({
       targets: displayPrizeBg,
       alpha: 1,

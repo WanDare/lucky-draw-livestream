@@ -20,14 +20,18 @@ export class LuckyDrawView {
   gamescreen!: Phaser.GameObjects.Image | null;
   prizenet!: Phaser.GameObjects.Image | null;
   prizenetopen!: Phaser.GameObjects.Image | null;
+  people!: Phaser.GameObjects.Image | null;
   thumbnail!: Phaser.GameObjects.Image;
   curtainOpen!: Phaser.GameObjects.Image;
   curtainLeft!: Phaser.GameObjects.Image;
   curtainRight!: Phaser.GameObjects.Image;
   transitionOverlay!: Phaser.GameObjects.Rectangle | null;
   collectedPrizeGraphics: Phaser.GameObjects.Container[] = [];
+  stageWinners: PrizeInfo[][] = [];
   private stagePrizeGraphics: Phaser.GameObjects.GameObject[] = [];
-  stageWinners: PrizeInfo[][] = []; // <-- store winners for each stage
+  private isStartButtonDisabled = false;
+  private isNetOpen = false;
+  private isNetSliding = false;
 
   onStart?: () => void;
   onPopupClosed?: () => void;
@@ -42,15 +46,21 @@ export class LuckyDrawView {
       ["background2", "assets/images/streaming_bg.png"],
       ["Thumbnail", "assets/images/thumbnail.png"],
       ["Gamescreen", "assets/images/lucky_game_bg.png"],
-      ["winner_blur_bg", "assets/images/blur.png"],
+      ["winner_blur_bg", "assets/images/blur2.png"],
       ["Start", "assets/images/start_button.png"],
       ["Ball", "assets/images/ticket_prize.png"],
-      ["Congrat", "assets/images/popup_winner.png"],
+      ["Congrat", "assets/images/popup_winner_screen.png"],
+      ["DragText", "assets/images/drag_text.png"],
       ["Displayprize", "assets/images/display_prize.png"],
+      ["People", "assets/images/people.png"],
       ["Next", "assets/images/next_button.png"],
       ["Prize", "assets/images/prizes/prize7.png"],
       ["Prize2", "assets/images/prizes/prize6.png"],
-      ["Prize3", "assets/images/prizes/prize5.png"],
+      ["Prize3", "assets/images/prizes/prize8.png"],
+      ["stage_label_iphone", "assets/images/stage_label_iphone.png"],
+      ["stage_label_aojiru", "assets/images/stage_label_aojiro.png"],
+      ["stage_label_giftbox", "assets/images/stage_label_giftbox.png"],
+      // <<=== Game Motions ===>>
       ["Curtain_left", "assets/motions/curtain_left.png"],
       ["Curtain_right", "assets/motions/curtain_right.png"],
       ["Curtainopen", "assets/motions/curtain_open.png"],
@@ -68,7 +78,6 @@ export class LuckyDrawView {
   }
 
   reset() {
-    // Call this at the start of a new game/session
     this.stageWinners = [];
   }
 
@@ -116,20 +125,26 @@ export class LuckyDrawView {
       .setDepth(1)
       .setInteractive({
         useHandCursor: false,
-        cursor: "url('/assets/images/cursor_hand.png'), pointer",
+        // cursor: "url('/assets/images/cursor_hand.png'), pointer",
       });
+
+    this.isStartButtonDisabled = false;
+    this.startButton.on("pointerdown", () => {
+      if (this.isStartButtonDisabled) return;
+      this.isStartButtonDisabled = true;
+      this.startButton.disableInteractive();
+
+      if (this.onStart) this.onStart();
+    });
 
     this.gamescreen = null;
     this.prizenet = null;
+    this.people = null;
 
     this.transitionOverlay = this.scene.add
       .rectangle(720, 512, 1440, 1024, 0x000000, 1)
       .setDepth(100)
       .setAlpha(0);
-
-    this.startButton.on("pointerdown", () => {
-      if (this.onStart) this.onStart();
-    });
   }
 
   closeCurtain(onCloseDone?: () => void) {
@@ -161,12 +176,29 @@ export class LuckyDrawView {
     });
   }
 
+  slideOutPeople(onDone?: () => void) {
+    if (this.people && this.people.visible) {
+      this.scene.tweens.add({
+        targets: this.people,
+        y: 1200,
+        duration: 420,
+        ease: "Cubic.easeIn",
+        onComplete: () => {
+          this.people?.setVisible(false);
+          if (onDone) onDone();
+        },
+      });
+    } else if (onDone) {
+      onDone();
+    }
+  }
+
   showGameScreen(dropBalls: () => void) {
     this.transitionOverlay?.setAlpha(0);
     this.curtainLeft.setX(360).setVisible(true).setAlpha(1);
     this.curtainRight.setX(360).setVisible(true).setAlpha(1);
 
-    LightshowFrameComponent.start(this.scene, 360, 70, {
+    LightshowFrameComponent.start(this.scene, 370, 70, {
       size: 260,
       depth: 5,
     });
@@ -176,7 +208,7 @@ export class LuckyDrawView {
       alpha: 1,
       duration: 0,
       onComplete: () => {
-        this.openCurtain(() => {
+        this.closeCurtain(() => {
           this.background1.setVisible(false);
           this.startButton.setVisible(false);
           this.thumbnail.setVisible(false);
@@ -188,29 +220,95 @@ export class LuckyDrawView {
             .setAlpha(1)
             .setDepth(2);
 
+          this.people = this.scene.add
+            .image(360, 1200, "People")
+            .setOrigin(0.5)
+            .setDisplaySize(868, 300)
+            .setAlpha(1)
+            .setDepth(8)
+            .setVisible(true);
+
+          this.scene.tweens.add({
+            targets: this.people,
+            y: 950,
+            duration: 520,
+            ease: "Cubic.easeOut",
+          });
+
           this.prizenet = this.scene.add
-            .image(360, 260, "Prizenet")
+            .image(360, 220, "Prizenet")
             .setOrigin(0.5)
             .setDisplaySize(720, 500)
             .setAlpha(1)
+            .setDepth(4);
+
+          this.prizenetopen = this.scene.add
+            .image(360, 220, "Prizenetopen")
+            .setOrigin(0.5)
+            .setDisplaySize(720, 500)
+            .setAlpha(0)
             .setDepth(3);
 
           this.transitionOverlay?.setAlpha(0);
 
           DragMotionComponent.create(this.scene, 360, 18, {
             size: 10,
-            depth: 11,
+            depth: 6,
             onDrop: dropBalls,
             onDragProgress: (progress) => {
-              if (this.prizenet) {
-                if (progress > 0.65) {
-                  this.prizenet.setTexture("Prizenetopen");
-                } else {
-                  this.prizenet.setTexture("Prizenet");
-                }
+              if (!this.prizenet || !this.prizenetopen) return;
+
+              if (progress > 0.65 && !this.isNetOpen && !this.isNetSliding) {
+                this.isNetSliding = true;
+
+                this.scene.tweens.add({
+                  targets: this.prizenet,
+                  y: 20,
+                  alpha: 0,
+                  duration: 350,
+                  ease: "Cubic.easeIn",
+                });
+
+                this.scene.tweens.add({
+                  targets: this.prizenetopen,
+                  alpha: 1,
+                  duration: 350,
+                  ease: "Cubic.easeIn",
+                  onComplete: () => {
+                    this.isNetOpen = true;
+                    this.isNetSliding = false;
+                  },
+                });
+              } else if (
+                progress <= 0.65 &&
+                this.isNetOpen &&
+                !this.isNetSliding
+              ) {
+                this.isNetSliding = true;
+
+                this.scene.tweens.add({
+                  targets: this.prizenet,
+                  y: 20,
+                  alpha: 1,
+                  duration: 350,
+                  ease: "Cubic.easeOut",
+                });
+
+                this.scene.tweens.add({
+                  targets: this.prizenetopen,
+                  alpha: 0,
+                  duration: 350,
+                  ease: "Cubic.easeOut",
+                  onComplete: () => {
+                    this.isNetOpen = false;
+                    this.isNetSliding = false;
+                  },
+                });
               }
             },
           });
+
+          this.openCurtain();
         });
       },
     });
@@ -234,7 +332,6 @@ export class LuckyDrawView {
       prizes,
       onNext
     );
-    // Store for summary panel at the end
     this.stageWinners.push([...prizes]);
   }
 
@@ -247,7 +344,7 @@ export class LuckyDrawView {
 
   showStageLabel(label: string) {
     const text = this.scene.add
-      .text(720, 80, label, {
+      .text(360, 430, label, {
         font: "bold 38px Arial",
         color: "#fff080",
         align: "center",
@@ -278,13 +375,12 @@ export class LuckyDrawView {
   }
 
   showGameCompleteSummary() {
-    const panelX = 720;
+    const panelX = 360;
     const panelY = 512;
-    const panelWidth = 1440;
+    const panelWidth = 720;
     const panelHeight = 1024;
     const objects: Phaser.GameObjects.GameObject[] = [];
 
-    // Fullscreen blur
     const blurImage = this.scene.add
       .image(panelX, panelY, "winner_blur_bg")
       .setOrigin(0.5)
@@ -293,82 +389,71 @@ export class LuckyDrawView {
       .setAlpha(1);
     objects.push(blurImage);
 
-    // Main title
-    const title = this.scene.add
-      .text(panelX, 110, "YOU WIN!", {
-        font: "bold 60px Arial",
-        color: "#FFD700",
-        align: "center",
-      })
-      .setOrigin(0.5)
-      .setDepth(1502)
-      .setAlpha(1);
-    objects.push(title);
-
-    // Stage summary sections (reverse order)
     const startY = 200;
     let currY = startY;
-    const stageLabels = [
-      "Stage 1 Winners",
-      "Stage 2 Winners",
-      "Final Stage Winners",
+    const stageLabelImages = [
+      "stage_label_iphone",
+      "stage_label_aojiru",
+      "stage_label_giftbox",
     ];
 
-    // Reverse the stages for bottom-to-top display
     const reversedStages = [...this.stageWinners].reverse();
 
     reversedStages.forEach((stage, i) => {
-      // Calculate the correct label index for reversed order
       const labelIndex = this.stageWinners.length - 1 - i;
-      const label = this.scene.add
-        .text(
-          panelX,
-          currY,
-          stageLabels[labelIndex] ?? `Stage ${labelIndex + 1} Winners`,
-          {
+      const labelImageKey = stageLabelImages[labelIndex];
+
+      let labelObj: Phaser.GameObjects.GameObject;
+      if (labelImageKey && this.scene.textures.exists(labelImageKey)) {
+        labelObj = this.scene.add
+          .image(panelX, currY - 20, labelImageKey)
+          .setOrigin(0.5)
+          .setDepth(1502)
+          .setDisplaySize(192, 88);
+      } else {
+        labelObj = this.scene.add
+          .text(panelX, currY, `Stage ${labelIndex + 1} Winners`, {
             font: "bold 36px Arial",
             color: "#ffffff",
             align: "center",
-          }
-        )
-        .setOrigin(0.5)
-        .setDepth(1502);
-      objects.push(label);
+          })
+          .setOrigin(0.5)
+          .setDepth(1502);
+      }
+      objects.push(labelObj);
 
       currY += 56;
+      const COLUMNS = 4;
+      const CARD_W = 157;
+      const CARD_H = 49;
+      const GAP_X = 10;
+      const GAP_Y = 10;
 
-      // Reverse the cards for each stage
-      const reversedStage = [...stage].reverse();
-      const columns = reversedStage.length;
-      const cardSpacingX = 220;
-      const totalWidth = (columns - 1) * cardSpacingX;
-      const baseX = panelX - totalWidth / 2;
-      const y = currY;
+      const cardsInStage = [...stage].reverse();
 
-      reversedStage.forEach((prize, j) => {
-        const x = baseX + j * cardSpacingX;
-        const card = PrizeCardComponent.create(this.scene, x, y, prize);
+      cardsInStage.forEach((prize, idx) => {
+        const col = idx % COLUMNS;
+        const row = Math.floor(idx / COLUMNS);
+        const gridWidth = COLUMNS * CARD_W + (COLUMNS - 1) * GAP_X;
+        // Center the grid
+        const x = panelX - gridWidth / 2 + col * (CARD_W + GAP_X) + CARD_W / 2;
+        const y = currY + row * (CARD_H + GAP_Y) + CARD_H / 2;
+
+        const card = PrizeCardComponent.create(
+          this.scene,
+          x,
+          y,
+          prize,
+          CARD_W,
+          CARD_H
+        );
         card.setDepth(1502);
         objects.push(card);
       });
 
-      currY += 170;
+      const rows = Math.ceil(cardsInStage.length / COLUMNS);
+      currY += rows * (CARD_H + GAP_Y) + 35;
     });
-
-    // Close button
-    // const closeBtn = this.scene.add
-    //   .image(panelX, panelY + panelHeight / 2 - 80, "Next")
-    //   .setOrigin(0.5)
-    //   .setDisplaySize(180, 88)
-    //   .setDepth(1502)
-    //   .setInteractive({ useHandCursor: true });
-
-    // objects.push(closeBtn);
-
-    // closeBtn.on("pointerdown", () => {
-    //   objects.forEach((g) => g.destroy());
-    //   this.stageWinners = [];
-    // });
   }
 
   renderPrizePanel(prizes: PrizeInfo[]) {

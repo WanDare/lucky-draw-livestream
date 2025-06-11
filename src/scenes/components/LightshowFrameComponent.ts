@@ -1,6 +1,4 @@
-// components/LightshowFrameComponent.ts
 import Phaser from "phaser";
-
 export class LightshowFrameComponent {
   /**
    * Creates and starts the lightshow animation.

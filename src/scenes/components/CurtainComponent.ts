@@ -1,4 +1,3 @@
-// components/CurtainComponent.ts
 import Phaser from "phaser";
 
 export class CurtainComponent {
@@ -35,22 +34,30 @@ export class CurtainComponent {
   ) {
     curtainLeft.setX(360).setVisible(true).setAlpha(1).setDepth(7);
     curtainRight.setX(310).setVisible(true).setAlpha(1).setDepth(7);
+
+    let finished = 0;
+    function finish() {
+      finished += 1;
+      if (finished === 2) {
+        curtainLeft.setVisible(false);
+        curtainRight.setVisible(false);
+        if (onDone) onDone();
+      }
+    }
+
     scene.tweens.add({
       targets: curtainLeft,
       x: 0,
-      duration: 2500,
+      duration: 4000,
       ease: "Cubic.easeInOut",
+      onComplete: finish,
     });
     scene.tweens.add({
       targets: curtainRight,
       x: 720,
-      duration: 2500,
+      duration: 4000,
       ease: "Cubic.easeInOut",
-      onComplete: () => {
-        curtainLeft.setVisible(false);
-        curtainRight.setVisible(false);
-        if (onDone) onDone();
-      },
+      onComplete: finish,
     });
   }
 }

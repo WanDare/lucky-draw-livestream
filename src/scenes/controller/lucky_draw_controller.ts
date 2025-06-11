@@ -9,15 +9,27 @@ export class LuckyDrawController {
   private isCollectingPrize = false;
 
   private stages = [
-    { count: 6, label: "Stage 1: Collect 15 Ticket" },
-    { count: 3, label: "Stage 2: Collect 9 Ticket" },
-    { count: 2, label: "Final Stage: Collect 6 Ticket" },
+    {
+      count: 6,
+      label: "Stage 1: ចាប់យកឲបាន 15 Ticket",
+      winner: "អ្នកឈ្នះរង្វាន់",
+    },
+    {
+      count: 3,
+      label: "Stage 2: ចាប់យកឲបាន 9 Ticket",
+      winner: "អ្នកឈ្នះរង្វាន់",
+    },
+    {
+      count: 2,
+      label: "Final Stage: ចាប់យកឲបាន 6 Ticket",
+      winner: "អ្នកឈ្នះរង្វាន់",
+    },
   ];
 
   stagePrizes = [
     { image: "Prize", name: "Sakkin Aajiro Small Box", value: "34 ​​រង្វាន់" },
     { image: "Prize2", name: "Sakkin Aajiro Box", value: "24 ​រង្វាន់" },
-    { image: "Prize3", name: "$10 Gift Card", value: "12 ​​រង្វាន់" },
+    { image: "Prize3", name: "IPHONE 16 PRO MAX", value: "1 ​​រង្វាន់" },
   ];
 
   private currentStage = 0;
@@ -121,11 +133,9 @@ export class LuckyDrawController {
   }
 
   spawnBall() {
-    // Randomize starting X position
     const x = Phaser.Math.Between(20, 675);
-    const y = -40;
+    const y = 170;
 
-    // Create the ticket (ball) image
     const ball = this.scene.add
       .image(x, y, "Ball")
       .setOrigin(0.5)
@@ -133,14 +143,11 @@ export class LuckyDrawController {
       .setDepth(2)
       .setInteractive({ useHandCursor: true });
 
-    // --- NEW: Set a random initial rotation ---
-    // Gives each ticket a slightly different starting angle.
     ball.setAngle(Phaser.Math.Between(-45, 45));
 
-    // Animate the ticket falling
     const ballTween = this.scene.tweens.add({
       targets: ball,
-      y: 1000, // Target Y position (off-screen)
+      y: 1000,
 
       angle: Phaser.Math.Between(-270, 270),
 
@@ -185,7 +192,7 @@ export class LuckyDrawController {
       .image(ball.x, ball.y, "Ball")
       .setOrigin(0.5)
       .setDisplaySize(70, 70)
-      .setDepth(20);
+      .setDepth(100);
 
     this.scene.tweens.add({
       targets: flyBall,
@@ -235,21 +242,22 @@ export class LuckyDrawController {
     });
   }
 
-  // ----------- THE KEY FUNCTION FOR CURTAIN TRANSITIONS -----------
   onStageComplete() {
     this.clearAllBalls();
     const prizesThisStage = this.model.getPrizes();
 
-    this.view.showStageWinnersPanel(prizesThisStage, () => {
-      this.currentStage += 1;
-      if (this.currentStage < this.stages.length) {
-        this.model.clearPrizes();
-        this.curtainStageTransition(() => this.startStage(this.currentStage));
-      } else {
-        this.curtainStageTransition(() => {
-          this.view.showGameComplete?.();
-        });
-      }
+    this.view.slideOutPeople(() => {
+      this.view.showStageWinnersPanel(prizesThisStage, () => {
+        this.currentStage += 1;
+        if (this.currentStage < this.stages.length) {
+          this.model.clearPrizes();
+          this.curtainStageTransition(() => this.startStage(this.currentStage));
+        } else {
+          this.curtainStageTransition(() => {
+            this.view.showGameComplete?.();
+          });
+        }
+      });
     });
   }
 

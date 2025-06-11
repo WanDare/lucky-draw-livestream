@@ -1,4 +1,3 @@
-// components/WinnerPanelComponent.ts
 import Phaser from "phaser";
 import type { PrizeInfo } from "../model/lucky_draw_model";
 import { PrizeCardComponent } from "./PrizeCardComponent";
@@ -9,9 +8,9 @@ export class WinnerPanelComponent {
     prizes: PrizeInfo[],
     onNext: () => void
   ): Phaser.GameObjects.GameObject[] {
-    const panelX = 720;
+    const panelX = 360;
     const panelY = 512;
-    const panelWidth = 1440;
+    const panelWidth = 720;
     const panelHeight = 1024;
 
     const blurImage = scene.add

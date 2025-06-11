@@ -1,10 +1,8 @@
-// components/PopupComponent.ts
 import Phaser from "phaser";
 import type { PrizeInfo } from "../model/lucky_draw_model";
 import { launchConfetti } from "../effects/confetti";
 
 export class PopupComponent {
-  // Congratulation popup
   static showCongrat(
     scene: Phaser.Scene,
     prize: PrizeInfo,
@@ -25,9 +23,9 @@ export class PopupComponent {
       .setAlpha(0);
 
     const nameText = scene.add
-      .text(width / 2, height - 490, prize.name, {
+      .text(width / 2 + 40, height - 520, prize.name, {
         font: "bold 16px Arial",
-        color: "#fff",
+        color: "#538B3C",
         align: "center",
       })
       .setOrigin(0.5)
@@ -35,9 +33,9 @@ export class PopupComponent {
       .setAlpha(0);
 
     const phoneText = scene.add
-      .text(width / 2, height - 460, prize.phone, {
-        font: "bold 26px Arial",
-        color: "#fff",
+      .text(width / 2 + 40, height - 490, prize.phone, {
+        font: "bold 24px Arial",
+        color: "#538B3C",
         align: "center",
       })
       .setOrigin(0.5)

@@ -1,4 +1,3 @@
-// components/PrizeCardComponent.ts
 import Phaser from "phaser";
 import type { PrizeInfo } from "../model/lucky_draw_model";
 
@@ -7,10 +6,10 @@ export class PrizeCardComponent {
     scene: Phaser.Scene,
     x: number,
     y: number,
-    prize: PrizeInfo
+    prize: PrizeInfo,
+    width = 209,
+    height = 65
   ): Phaser.GameObjects.Container {
-    const width = 209;
-    const height = 65;
     const borderRadius = 16;
 
     const cardBg = scene.add.graphics();
@@ -32,8 +31,8 @@ export class PrizeCardComponent {
     );
 
     const nameText = scene.add
-      .text(0, -13, prize.name, {
-        font: "bold 16px Poppins",
+      .text(0, -height / 6, prize.name.toUpperCase(), {
+        font: `bold ${Math.max(12, height / 4)}px Poppins`,
         color: "#ffffff",
         align: "center",
         fontStyle: "bold",
@@ -41,8 +40,8 @@ export class PrizeCardComponent {
       .setOrigin(0.5);
 
     const phoneText = scene.add
-      .text(0, 15, prize.phone, {
-        font: "bold 20px Poppins",
+      .text(0, height / 6, prize.phone.toUpperCase(), {
+        font: `bold ${Math.max(14, height / 3.2)}px Poppins`,
         color: "#ffffff",
         align: "center",
         fontStyle: "bold",
