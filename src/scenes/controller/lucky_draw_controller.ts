@@ -27,8 +27,8 @@ export class LuckyDrawController {
   ];
 
   stagePrizes = [
-    { image: "Prize", name: "Gift Yellow Box", value: "34 ​​រង្វាន់" },
-    { image: "Prize2", name: "Sakkin Aojiru Box", value: "24 ​រង្វាន់" },
+    { image: "Prize", name: "Gift Yellow Box", value: "18 ​​រង្វាន់" },
+    { image: "Prize2", name: "Sakkin Aojiru Box", value: "12 ​រង្វាន់" },
     { image: "Prize3", name: "IPHONE 16 PRO MAX", value: "1 ​​រង្វាន់" },
   ];
 

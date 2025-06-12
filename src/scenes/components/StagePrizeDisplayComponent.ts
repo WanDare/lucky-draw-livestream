@@ -67,7 +67,7 @@ export class StagePrizeDisplayComponent {
 
     const valueText = scene.add
       .text(0, 45, prizeConfig.value.toUpperCase(), {
-        font: "bold 12px Arial",
+        font: "bold 14px Arial",
         color: "#ffffff",
         align: "center",
         fontStyle: "bold",
