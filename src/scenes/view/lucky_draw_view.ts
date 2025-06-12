@@ -11,6 +11,12 @@ import { DragMotionComponent } from "../components/DragMotionComponent";
 import { LightshowFrameComponent } from "../components/LightshowFrameComponent";
 import { WinnerPanelComponent } from "../components/WinnerPanelComponent";
 
+const stageLabelImages = [
+  "stage_label_giftbox",
+  "stage_label_aojiru",
+  "stage_label_iphone",
+];
+
 export class LuckyDrawView {
   scene: Phaser.Scene;
 
@@ -43,14 +49,16 @@ export class LuckyDrawView {
   preload() {
     const images = [
       ["background1", "assets/images/poster_thumbnail.png"],
-      ["background2", "assets/images/streaming_bg.png"],
+      ["background2", "assets/images/streaming_background.png"],
       ["Thumbnail", "assets/images/thumbnail.png"],
-      ["Gamescreen", "assets/images/lucky_game_bg.png"],
+      ["Poster", "assets/images/poster.png"],
+      ["Gamescreen", "assets/images/lucky_game_main_bg.png"],
       ["winner_blur_bg", "assets/images/blur2.png"],
       ["Start", "assets/images/start_button.png"],
       ["Ball", "assets/images/ticket_prize.png"],
       ["Congrat", "assets/images/popup_winner_screen.png"],
       ["DragText", "assets/images/drag_text.png"],
+      ["card_bg", "assets/images/display_winner.png"],
       ["Displayprize", "assets/images/display_prize.png"],
       ["People", "assets/images/people.png"],
       ["Next", "assets/images/next_button.png"],
@@ -327,11 +335,21 @@ export class LuckyDrawView {
 
   showStageWinnersPanel(prizes: PrizeInfo[], onNext: () => void) {
     this.stagePrizeGraphics.forEach((g) => g.destroy());
+
+    const stageIdx = this.stageWinners.length;
+    const stageLabelKey = stageLabelImages[stageIdx] || "stage_label_iphone";
+
     this.stagePrizeGraphics = WinnerPanelComponent.show(
       this.scene,
       prizes,
-      onNext
+      () => {
+        this.stagePrizeGraphics.forEach((g) => g.destroy());
+        this.stagePrizeGraphics = [];
+        onNext();
+      },
+      stageLabelKey
     );
+
     this.stageWinners.push([...prizes]);
   }
 
@@ -389,6 +407,15 @@ export class LuckyDrawView {
       .setAlpha(1);
     objects.push(blurImage);
 
+    const posterX = 1080;
+    const posterY = 512;
+    const posterImage = this.scene.add
+      .image(posterX, posterY, "Poster")
+      .setOrigin(0.5)
+      .setDisplaySize(panelWidth, panelHeight)
+      .setDepth(1501);
+    objects.push(posterImage);
+
     const startY = 200;
     let currY = startY;
     const stageLabelImages = [
@@ -403,24 +430,14 @@ export class LuckyDrawView {
       const labelIndex = this.stageWinners.length - 1 - i;
       const labelImageKey = stageLabelImages[labelIndex];
 
-      let labelObj: Phaser.GameObjects.GameObject;
       if (labelImageKey && this.scene.textures.exists(labelImageKey)) {
-        labelObj = this.scene.add
+        const labelObj = this.scene.add
           .image(panelX, currY - 20, labelImageKey)
           .setOrigin(0.5)
           .setDepth(1502)
-          .setDisplaySize(192, 88);
-      } else {
-        labelObj = this.scene.add
-          .text(panelX, currY, `Stage ${labelIndex + 1} Winners`, {
-            font: "bold 36px Arial",
-            color: "#ffffff",
-            align: "center",
-          })
-          .setOrigin(0.5)
-          .setDepth(1502);
+          .setDisplaySize(224, 88);
+        objects.push(labelObj);
       }
-      objects.push(labelObj);
 
       currY += 56;
       const COLUMNS = 4;
@@ -435,7 +452,7 @@ export class LuckyDrawView {
         const col = idx % COLUMNS;
         const row = Math.floor(idx / COLUMNS);
         const gridWidth = COLUMNS * CARD_W + (COLUMNS - 1) * GAP_X;
-        // Center the grid
+
         const x = panelX - gridWidth / 2 + col * (CARD_W + GAP_X) + CARD_W / 2;
         const y = currY + row * (CARD_H + GAP_Y) + CARD_H / 2;
 
@@ -461,17 +478,28 @@ export class LuckyDrawView {
     this.collectedPrizeGraphics = [];
 
     const columns = 3;
-    const cardSpacingX = 240;
-    const cardSpacingY = 85;
-    const baseX = 840;
-    const baseY = 350;
+    const cardWidth = 200;
+    const cardHeight = 65;
+    const gap = 10;
+    const cardSpacingX = cardWidth + gap;
+    const cardSpacingY = cardHeight + gap;
+
+    const baseX = 870;
+    const baseY = 320;
 
     prizes.forEach((prize, i) => {
       const col = i % columns;
       const row = Math.floor(i / columns);
       const x = baseX + col * cardSpacingX;
       const y = baseY + row * cardSpacingY;
-      const card = PrizeCardComponent.create(this.scene, x, y, prize);
+      const card = PrizeCardComponent.create(
+        this.scene,
+        x,
+        y,
+        prize,
+        cardWidth,
+        cardHeight
+      );
       this.collectedPrizeGraphics.push(card);
     });
   }

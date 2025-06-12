@@ -30,7 +30,7 @@ export class DragMotionComponent {
     const dragText = scene.add
       .image(0, 100, "DragText")
       .setOrigin(0.5, 0)
-      .setDisplaySize(428, 48)
+      .setDisplaySize(428, 60)
       .setDepth(depth);
 
     const container = scene.add

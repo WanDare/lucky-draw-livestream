@@ -10,18 +10,18 @@ export class LuckyDrawController {
 
   private stages = [
     {
-      count: 6,
-      label: "Stage 1: ចាប់យកឲបាន 15 Ticket",
+      count: 18,
+      label: "Stage 1: ចាប់យកឲបាន 18 Ticket",
       winner: "អ្នកឈ្នះរង្វាន់",
     },
     {
-      count: 3,
-      label: "Stage 2: ចាប់យកឲបាន 9 Ticket",
+      count: 12,
+      label: "Stage 2: ចាប់យកឲបាន 12 Ticket",
       winner: "អ្នកឈ្នះរង្វាន់",
     },
     {
-      count: 2,
-      label: "Final Stage: ចាប់យកឲបាន 6 Ticket",
+      count: 1,
+      label: "Final Stage: ចាប់យកឲបាន 1 Ticket",
       winner: "អ្នកឈ្នះរង្វាន់",
     },
   ];
@@ -245,6 +245,9 @@ export class LuckyDrawController {
   onStageComplete() {
     this.clearAllBalls();
     const prizesThisStage = this.model.getPrizes();
+
+    this.view.collectedPrizeGraphics.forEach((c) => c.destroy());
+    this.view.collectedPrizeGraphics = [];
 
     this.view.slideOutPeople(() => {
       this.view.showStageWinnersPanel(prizesThisStage, () => {

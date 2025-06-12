@@ -10,25 +10,10 @@ export class PrizeCardComponent {
     width = 209,
     height = 65
   ): Phaser.GameObjects.Container {
-    const borderRadius = 16;
-
-    const cardBg = scene.add.graphics();
-    cardBg.lineStyle(4, 0xf9ffb2, 0.85);
-    cardBg.strokeRoundedRect(
-      -width / 2,
-      -height / 2,
-      width,
-      height,
-      borderRadius
-    );
-    cardBg.fillStyle(0x214e16, 1);
-    cardBg.fillRoundedRect(
-      -width / 2,
-      -height / 2,
-      width,
-      height,
-      borderRadius
-    );
+    const cardBg = scene.add
+      .image(0, 0, "card_bg")
+      .setDisplaySize(width, height)
+      .setOrigin(0.5);
 
     const nameText = scene.add
       .text(0, -height / 6, prize.name.toUpperCase(), {
@@ -48,7 +33,7 @@ export class PrizeCardComponent {
       })
       .setOrigin(0.5);
 
-    const container = scene.add.container(x, y, [cardBg, nameText, phoneText]);
+   const container = scene.add.container(x, y, [cardBg, nameText, phoneText]);
     container.setDepth(22);
 
     container.setScale(0.7).setAlpha(0);
