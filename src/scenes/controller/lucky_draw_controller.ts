@@ -27,8 +27,8 @@ export class LuckyDrawController {
   ];
 
   stagePrizes = [
-    { image: "Prize", name: "Sakkin Aajiro Small Box", value: "34 ​​រង្វាន់" },
-    { image: "Prize2", name: "Sakkin Aajiro Box", value: "24 ​រង្វាន់" },
+    { image: "Prize", name: "Gift Yellow Box", value: "34 ​​រង្វាន់" },
+    { image: "Prize2", name: "Sakkin Aojiru Box", value: "24 ​រង្វាន់" },
     { image: "Prize3", name: "IPHONE 16 PRO MAX", value: "1 ​​រង្វាន់" },
   ];
 
@@ -83,7 +83,8 @@ export class LuckyDrawController {
     this.model.clearPrizes();
     this.view.renderPrizePanel(this.model.getPrizes());
     this.maxCollect = this.stages[stageIdx].count;
-    this.view.showStageLabel?.(this.stages[stageIdx].label);
+
+    this.view.showStageLabel?.(stageIdx);
 
     this.view.showGameScreen(() => this.startInfiniteBallDrop());
     this.view.showStagePrize(this.stagePrizes[stageIdx]);

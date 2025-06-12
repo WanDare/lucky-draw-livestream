@@ -23,7 +23,7 @@ export class PopupComponent {
       .setAlpha(0);
 
     const nameText = scene.add
-      .text(width / 2 + 40, height - 520, prize.name, {
+      .text(width / 2 + 40, height - 485, prize.name, {
         font: "bold 16px Arial",
         color: "#538B3C",
         align: "center",
@@ -33,7 +33,7 @@ export class PopupComponent {
       .setAlpha(0);
 
     const phoneText = scene.add
-      .text(width / 2 + 40, height - 490, prize.phone, {
+      .text(width / 2 + 40, height - 455, prize.phone, {
         font: "bold 24px Arial",
         color: "#538B3C",
         align: "center",

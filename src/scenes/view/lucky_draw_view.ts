@@ -17,6 +17,8 @@ const stageLabelImages = [
   "stage_label_iphone",
 ];
 
+export const stageTitleImages = ["Stage1", "Stage2", "Stage3"];
+
 export class LuckyDrawView {
   scene: Phaser.Scene;
 
@@ -48,27 +50,34 @@ export class LuckyDrawView {
 
   preload() {
     const images = [
+      // <<=== Core and Background Images ===>
       ["background1", "assets/images/poster_thumbnail.png"],
       ["background2", "assets/images/streaming_background.png"],
       ["Thumbnail", "assets/images/thumbnail.png"],
       ["Poster", "assets/images/poster.png"],
       ["Gamescreen", "assets/images/lucky_game_main_bg.png"],
       ["winner_blur_bg", "assets/images/blur2.png"],
-      ["Start", "assets/images/start_button.png"],
       ["Ball", "assets/images/ticket_prize.png"],
       ["Congrat", "assets/images/popup_winner_screen.png"],
-      ["DragText", "assets/images/drag_text.png"],
       ["card_bg", "assets/images/display_winner.png"],
       ["Displayprize", "assets/images/display_prize.png"],
       ["People", "assets/images/people.png"],
+      // <<=== Button ===>>
+      ["Start", "assets/images/start_button.png"],
       ["Next", "assets/images/next_button.png"],
+      // <<=== Display Prizes item ===>>
       ["Prize", "assets/images/prizes/prize7.png"],
       ["Prize2", "assets/images/prizes/prize6.png"],
       ["Prize3", "assets/images/prizes/prize8.png"],
+      // <<=== Title & Text ===>>
+      ["Stage1", "assets/images/stage1.png"],
+      ["Stage2", "assets/images/stage2.png"],
+      ["Stage3", "assets/images/stage3.png"],
       ["stage_label_iphone", "assets/images/stage_label_iphone.png"],
       ["stage_label_aojiru", "assets/images/stage_label_aojiro.png"],
       ["stage_label_giftbox", "assets/images/stage_label_giftbox.png"],
-      // <<=== Game Motions ===>>
+      ["DragText", "assets/images/drag_text.png"],
+      // <<=== Game Object Motions ===>>
       ["Curtain_left", "assets/motions/curtain_left.png"],
       ["Curtain_right", "assets/motions/curtain_right.png"],
       ["Curtainopen", "assets/motions/curtain_open.png"],
@@ -238,7 +247,7 @@ export class LuckyDrawView {
 
           this.scene.tweens.add({
             targets: this.people,
-            y: 950,
+            y: 960,
             duration: 520,
             ease: "Cubic.easeOut",
           });
@@ -360,21 +369,19 @@ export class LuckyDrawView {
     });
   }
 
-  showStageLabel(label: string) {
-    const text = this.scene.add
-      .text(360, 430, label, {
-        font: "bold 38px Arial",
-        color: "#fff080",
-        align: "center",
-      })
+  showStageLabel(stageIdx: number) {
+    const stageTitleKey = stageTitleImages[stageIdx] || "Stage1";
+    const image = this.scene.add
+      .image(360, 430, stageTitleKey)
       .setOrigin(0.5)
-      .setDepth(200);
+      .setDepth(200)
+      .setDisplaySize(315, 35);
     this.scene.tweens.add({
-      targets: text,
+      targets: image,
       alpha: 0,
       delay: 1200,
       duration: 400,
-      onComplete: () => text.destroy(),
+      onComplete: () => image.destroy(),
     });
   }
 
@@ -416,14 +423,23 @@ export class LuckyDrawView {
       .setDepth(1501);
     objects.push(posterImage);
 
-    const startY = 200;
-    let currY = startY;
+    const labelHeight = 88;
+    const labelWidth = 224;
+    const spacingAfterLabel = 38;
+    const stageBlockPaddingY = 36;
+    const CARD_W = 157;
+    const CARD_H = 49;
+    const GAP_X = 10;
+    const GAP_Y = 10;
+    const COLUMNS = 4;
+
+    let currY = 35;
+
     const stageLabelImages = [
       "stage_label_iphone",
       "stage_label_aojiru",
       "stage_label_giftbox",
     ];
-
     const reversedStages = [...this.stageWinners].reverse();
 
     reversedStages.forEach((stage, i) => {
@@ -432,44 +448,57 @@ export class LuckyDrawView {
 
       if (labelImageKey && this.scene.textures.exists(labelImageKey)) {
         const labelObj = this.scene.add
-          .image(panelX, currY - 20, labelImageKey)
+          .image(panelX, currY + labelHeight / 2, labelImageKey)
           .setOrigin(0.5)
-          .setDepth(1502)
-          .setDisplaySize(224, 88);
+          .setDisplaySize(labelWidth, labelHeight)
+          .setDepth(1502);
         objects.push(labelObj);
       }
 
-      currY += 56;
-      const COLUMNS = 4;
-      const CARD_W = 157;
-      const CARD_H = 49;
-      const GAP_X = 10;
-      const GAP_Y = 10;
+      currY += labelHeight + spacingAfterLabel;
 
       const cardsInStage = [...stage].reverse();
+      const numCards = cardsInStage.length;
 
-      cardsInStage.forEach((prize, idx) => {
-        const col = idx % COLUMNS;
-        const row = Math.floor(idx / COLUMNS);
-        const gridWidth = COLUMNS * CARD_W + (COLUMNS - 1) * GAP_X;
-
-        const x = panelX - gridWidth / 2 + col * (CARD_W + GAP_X) + CARD_W / 2;
-        const y = currY + row * (CARD_H + GAP_Y) + CARD_H / 2;
-
+      if (numCards === 1) {
         const card = PrizeCardComponent.create(
           this.scene,
-          x,
-          y,
-          prize,
+          panelX,
+          currY + CARD_H / 2,
+          cardsInStage[0],
           CARD_W,
           CARD_H
         );
         card.setDepth(1502);
         objects.push(card);
-      });
 
-      const rows = Math.ceil(cardsInStage.length / COLUMNS);
-      currY += rows * (CARD_H + GAP_Y) + 35;
+        currY += CARD_H;
+      } else if (numCards > 1) {
+        const rows = Math.ceil(numCards / COLUMNS);
+        const gridHeight = rows * CARD_H + (rows - 1) * GAP_Y;
+        const gridWidth = COLUMNS * CARD_W + (COLUMNS - 1) * GAP_X;
+
+        for (let idx = 0; idx < numCards; idx++) {
+          const col = idx % COLUMNS;
+          const row = Math.floor(idx / COLUMNS);
+          const x =
+            panelX - gridWidth / 2 + col * (CARD_W + GAP_X) + CARD_W / 2;
+          const y = currY + row * (CARD_H + GAP_Y) + CARD_H / 2;
+          const card = PrizeCardComponent.create(
+            this.scene,
+            x,
+            y,
+            cardsInStage[idx],
+            CARD_W,
+            CARD_H
+          );
+          card.setDepth(1502);
+          objects.push(card);
+        }
+        currY += gridHeight;
+      }
+
+      currY += stageBlockPaddingY;
     });
   }
 
