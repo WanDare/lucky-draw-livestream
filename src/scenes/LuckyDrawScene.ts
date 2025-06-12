@@ -6,7 +6,6 @@ import { LuckyDrawController } from "./controller/lucky_draw_controller";
 export default class LuckyDrawScene extends Phaser.Scene {
   private model!: PrizeModel;
   private view!: LuckyDrawView;
-  private controller!: LuckyDrawController;
 
   constructor() {
     super({ key: "LuckyDrawScene" });
@@ -27,6 +26,7 @@ export default class LuckyDrawScene extends Phaser.Scene {
     // );
 
     this.view.createLayout(centerX, centerY);
-    this.controller = new LuckyDrawController(this.model, this.view, this);
+    this.view.createLayout(centerX, centerY);
+    new LuckyDrawController(this.model, this.view, this);
   }
 }

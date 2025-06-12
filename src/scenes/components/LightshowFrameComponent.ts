@@ -21,7 +21,6 @@ export class LightshowFrameComponent {
   ): { image: Phaser.GameObjects.Image; stop: () => void } {
     const frames = ["lightshow1", "lightshow2", "lightshow3", "lightshow4"];
     let frameIdx = 0;
-    const size = options?.size ?? 780;
     const depth = options?.depth ?? 12;
 
     const image = scene.add
@@ -30,7 +29,6 @@ export class LightshowFrameComponent {
       .setDisplaySize(850, 250)
       .setDepth(depth);
 
-    // Animate the frame every 70ms (about 14fps)
     const timer = scene.time.addEvent({
       delay: 500,
       loop: true,
@@ -40,7 +38,6 @@ export class LightshowFrameComponent {
       },
     });
 
-    // Cleanup function: stops the animation and destroys the image
     function stop() {
       timer.remove(false);
       image.destroy();

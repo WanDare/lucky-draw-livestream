@@ -7,7 +7,7 @@ export class DragMotionComponent {
   static create(
     scene: Phaser.Scene,
     x: number,
-    y: number,
+    _y: number,
     options: {
       size?: number;
       depth?: number;
@@ -52,7 +52,6 @@ export class DragMotionComponent {
     let dragStartY = 0;
     let hasDropped = false;
     let hasDragged = false;
-    const dragMaxDistance = 30;
     const dropThreshold = 48;
 
     dragImage.on("dragstart", (_pointer: Phaser.Input.Pointer) => {
