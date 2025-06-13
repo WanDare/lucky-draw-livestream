@@ -41,7 +41,6 @@ export class LuckyDrawController {
   }[] = [];
 
   private ballSpawnTimer?: Phaser.Time.TimerEvent;
-  private maxBallsOnScreen = 20;
 
   constructor(model: PrizeModel, view: LuckyDrawView, scene: Phaser.Scene) {
     this.model = model;
@@ -117,24 +116,25 @@ export class LuckyDrawController {
           this.ballSpawnTimer = undefined;
           return;
         }
-        while (
-          this.ballPairs.length < this.maxBallsOnScreen &&
-          this.model.getPrizes().length < this.maxCollect
-        ) {
-          this.spawnBall();
-        }
+        this.spawnBall();
       },
     });
   }
 
   spawnBall() {
-    const x = Phaser.Math.Between(20, 675);
-    const y = 170;
+    const gameWidth = this.scene.scale.width;
+    const gameHeight = this.scene.scale.height;
+
+    // Responsive random spawn area (horizontal span, top vertical)
+    const x = Phaser.Math.Between(gameWidth * 0.015, gameWidth * 0.47);
+    const y = gameHeight * 0.16;
+
+    const ballSize = Math.max(gameWidth, gameHeight) * 0.07; // About 70-100px on large screens
 
     const ball = this.scene.add
       .image(x, y, "Ball")
       .setOrigin(0.5)
-      .setDisplaySize(70, 70)
+      .setDisplaySize(ballSize, ballSize)
       .setDepth(2)
       .setInteractive({ useHandCursor: true });
 
@@ -142,10 +142,8 @@ export class LuckyDrawController {
 
     const ballTween = this.scene.tweens.add({
       targets: ball,
-      y: 1000,
-
+      y: gameHeight * 0.98,
       angle: Phaser.Math.Between(-270, 270),
-
       ease: "Sine.easeInOut",
       duration: Phaser.Math.Between(8500, 15000),
       delay: Phaser.Math.Between(0, 700),
@@ -177,16 +175,28 @@ export class LuckyDrawController {
   }
 
   collectPrizeWithAnimation(ball: Phaser.GameObjects.Image, prize: PrizeInfo) {
+    const gameWidth = this.scene.scale.width;
+    const gameHeight = this.scene.scale.height;
     this.pauseAllBalls();
     this.view.showPrizeCongratulation(prize);
 
-    const destX = 900 + (this.model.getPrizes().length % 3) * 240;
-    const destY = 270 + Math.floor(this.model.getPrizes().length / 3) * 95;
+    // Responsive grid destination (matches renderPrizePanel layout)
+    const columns = 3;
+    const cardWidth = gameWidth * 0.14;
+    const cardHeight = gameHeight * 0.063;
+    const gap = gameWidth * 0.007;
+    const baseX = gameWidth * 0.6;
+    const baseY = gameHeight * 0.32;
+    const idx = this.model.getPrizes().length;
+    const col = idx % columns;
+    const row = Math.floor(idx / columns);
+    const destX = baseX + col * (cardWidth + gap);
+    const destY = baseY + row * (cardHeight + gap);
 
     const flyBall = this.scene.add
       .image(ball.x, ball.y, "Ball")
       .setOrigin(0.5)
-      .setDisplaySize(70, 70)
+      .setDisplaySize(cardHeight, cardHeight)
       .setDepth(100);
 
     this.scene.tweens.add({

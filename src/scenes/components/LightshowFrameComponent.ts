@@ -26,7 +26,7 @@ export class LightshowFrameComponent {
     const image = scene.add
       .image(x, y, frames[0])
       .setOrigin(0.5)
-      .setDisplaySize(850, 250)
+      .setDisplaySize(1150, 250)
       .setDepth(depth);
 
     const timer = scene.time.addEvent({

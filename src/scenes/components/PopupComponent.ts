@@ -15,7 +15,7 @@ export class PopupComponent {
     const { width, height } = scene.scale;
 
     const overlay = scene.add
-      .rectangle(360, 512, 720, 1024, 0x000000, 0.48)
+      .rectangle(width / 2, height / 2, width, height, 0x000000, 0.48)
       .setDepth(300)
       .setAlpha(0);
 
@@ -26,9 +26,13 @@ export class PopupComponent {
       .setDepth(2000)
       .setAlpha(0);
 
+    const nameFontSize = Math.max(20);
+    const phoneFontSize = Math.max(28);
+
+    // Move name/phone vertically as a percentage
     const nameText = scene.add
-      .text(width / 2 + 40, height - 485, prize.name.toUpperCase(), {
-        font: "bold 16px Arial",
+      .text(width / 2 + 50, height * 0.52, prize.name.toUpperCase(), {
+        font: `bold ${nameFontSize}px Arial`,
         color: "#538B3C",
         align: "center",
         letterSpacing: -0.32,
@@ -39,11 +43,11 @@ export class PopupComponent {
 
     const phoneText = scene.add
       .text(
-        width / 2 + 40,
-        height - 455,
+        width / 2 + 50,
+        height * 0.56,
         maskPhone(prize.phone.toUpperCase()),
         {
-          font: "bold 24px Arial",
+          font: `bold ${phoneFontSize}px Arial`,
           color: "#538B3C",
           align: "center",
           letterSpacing: -0.48,
@@ -85,7 +89,6 @@ export class PopupComponent {
     });
   }
 
-  // Stage or Game Complete overlay
   static showTextOverlay(
     scene: Phaser.Scene,
     mainText: string,
@@ -93,14 +96,17 @@ export class PopupComponent {
     onDone?: () => void,
     withConfetti?: boolean
   ) {
+    const { width, height } = scene.scale;
     const overlay = scene.add
-      .rectangle(720, 512, 1440, 1024, 0x000000, 0.7)
+      .rectangle(width / 2, height / 2, width, height, 0x000000, 0.7)
       .setDepth(250)
       .setAlpha(0);
 
+    const mainFontSize = Math.max(32, height * 0.053);
+
     const text = scene.add
-      .text(720, 512, mainText, {
-        font: "bold 54px Arial",
+      .text(width / 2, height / 2, mainText, {
+        font: `bold ${mainFontSize}px Arial`,
         color,
         align: "center",
       })
@@ -115,9 +121,13 @@ export class PopupComponent {
       ease: "Quad.easeIn",
       onComplete: () => {
         if (withConfetti) {
-          launchConfetti(scene, { x: 720, y: 512, amount: 70 });
+          launchConfetti(scene, { x: width / 2, y: height / 2, amount: 70 });
           scene.time.delayedCall(600, () => {
-            launchConfetti(scene, { x: 720, y: 412, amount: 48 });
+            launchConfetti(scene, {
+              x: width / 2,
+              y: height / 2 - height * 0.1,
+              amount: 48,
+            });
           });
         }
         scene.time.delayedCall(1000, () => {

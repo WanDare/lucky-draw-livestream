@@ -23,8 +23,8 @@ export default class LoadingScene extends Phaser.Scene {
         y: height / 2 - 50,
         text: "Loading...",
         style: {
-          font: "28px GROBOLD",
-          color: "#593D28",
+          font: "Bold 28px Arial",
+          color: "#ffffff",
           align: "center",
         },
       })
@@ -36,8 +36,8 @@ export default class LoadingScene extends Phaser.Scene {
         y: height / 2,
         text: "0%",
         style: {
-          font: "24px GROBOLD",
-          color: "#03792A",
+          font: "24px Arial",
+          color: "#ffffff",
           align: "center",
         },
       })
@@ -45,6 +45,12 @@ export default class LoadingScene extends Phaser.Scene {
 
     this.progressBar = this.add.graphics();
 
+    // Actually load assets (simulate longer loading for demo)
+    for (let i = 0; i < 30; i++) {
+      this.load.image(`dummy${i}`, "assets/images/ticket_prize.png");
+    }
+
+    // Progress bar update
     this.load.on("progress", (value: number) => {
       this.progressBar.clear();
       this.progressBar.fillStyle(0x03792a, 1);
@@ -57,17 +63,27 @@ export default class LoadingScene extends Phaser.Scene {
       this.percentText.setText(`${Math.floor(value * 100)}%`);
     });
 
-    this.load.on("complete", () => {
-      this.progressBar.destroy();
-      this.progressBox.destroy();
-      this.loadingText.destroy();
-      this.percentText.destroy();
+    let loadComplete = false;
+    let minTimePassed = false;
 
-      this.time.delayedCall(250, () => {
-        this.scene.start("LuckyDrawScene");
-      });
+    this.load.on("complete", () => {
+      loadComplete = true;
+      checkReady.call(this);
     });
 
-    // this.load.image('logo', 'assets/logo.png');
+    this.time.delayedCall(1500, () => {
+      minTimePassed = true;
+      checkReady.call(this);
+    });
+
+    const checkReady = () => {
+      if (loadComplete && minTimePassed) {
+        this.progressBar.destroy();
+        this.progressBox.destroy();
+        this.loadingText.destroy();
+        this.percentText.destroy();
+        this.scene.start("LuckyDrawScene");
+      }
+    };
   }
 }

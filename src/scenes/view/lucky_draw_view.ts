@@ -50,7 +50,7 @@ export class LuckyDrawView {
 
   preload() {
     const images = [
-      // <<=== Core and Background Images ===>
+      // Core and Background Images
       ["background1", "assets/images/poster_thumbnail.png"],
       ["background2", "assets/images/streaming_background.png"],
       ["Thumbnail", "assets/images/thumbnail.png"],
@@ -62,14 +62,14 @@ export class LuckyDrawView {
       ["card_bg", "assets/images/display_winner.png"],
       ["Displayprize", "assets/images/display_prize.png"],
       ["People", "assets/images/people.png"],
-      // <<=== Button ===>>
+      // Button
       ["Start", "assets/images/start_button.png"],
       ["Next", "assets/images/next_button.png"],
-      // <<=== Display Prizes item ===>>
+      // Display Prizes item
       ["Prize", "assets/images/prizes/prize7.png"],
       ["Prize2", "assets/images/prizes/prize6.png"],
       ["Prize3", "assets/images/prizes/prize8.png"],
-      // <<=== Title & Text ===>>
+      // Title & Text
       ["Stage1", "assets/images/stage1.png"],
       ["Stage2", "assets/images/stage2.png"],
       ["Stage3", "assets/images/stage3.png"],
@@ -77,7 +77,7 @@ export class LuckyDrawView {
       ["stage_label_aojiru", "assets/images/stage_label_aojiro.png"],
       ["stage_label_giftbox", "assets/images/stage_label_giftbox.png"],
       ["DragText", "assets/images/drag_text.png"],
-      // <<=== Game Object Motions ===>>
+      // Game Object Motions
       ["Curtain_left", "assets/motions/curtain_left.png"],
       ["Curtain_right", "assets/motions/curtain_right.png"],
       ["Curtainopen", "assets/motions/curtain_open.png"],
@@ -99,51 +99,49 @@ export class LuckyDrawView {
   }
 
   createLayout(_centerX: number, _centerY: number) {
+    const gameWidth = this.scene.scale.width;
+    const gameHeight = this.scene.scale.height;
+
     this.background1 = this.scene.add
-      .image(360, 512, "background1")
+      .image(gameWidth * 0.25, gameHeight / 2, "background1")
       .setOrigin(0.5)
-      .setDisplaySize(720, 1024)
+      .setDisplaySize(gameWidth * 0.5, gameHeight)
       .setDepth(-1);
 
     this.background2 = this.scene.add
-      .image(1080, 512, "background2")
+      .image(gameWidth * 0.75, gameHeight / 2, "background2")
       .setOrigin(0.5)
-      .setDisplaySize(720, 1024)
+      .setDisplaySize(gameWidth * 0.5, gameHeight)
       .setDepth(9);
 
     this.curtainLeft = this.scene.add
-      .image(0, 512, "Curtain_left")
+      .image(0, gameHeight / 2, "Curtain_left")
       .setOrigin(1, 0.5)
-      .setDisplaySize(360, 1024)
+      .setDisplaySize(gameWidth * 0.25, gameHeight)
       .setDepth(2)
       .setAlpha(1)
       .setVisible(false);
 
-    this.scene.load.image("winner_blur_bg", "assets/images/winner_blur_bg.png");
-
     this.curtainRight = this.scene.add
-      .image(720, 512, "Curtain_right")
+      .image(gameWidth / 2, gameHeight / 2, "Curtain_right")
       .setOrigin(0, 0.5)
-      .setDisplaySize(420, 1024)
+      .setDisplaySize(gameWidth * 0.29, gameHeight)
       .setDepth(2)
       .setAlpha(1)
       .setVisible(false);
 
     this.thumbnail = this.scene.add
-      .image(360, 512, "Thumbnail")
+      .image(gameWidth * 0.25, gameHeight / 2, "Thumbnail")
       .setOrigin(0.5)
-      .setDisplaySize(516, 728)
+      .setDisplaySize(gameWidth * 0.36, gameHeight * 0.71)
       .setDepth(1);
 
     this.startButton = this.scene.add
-      .image(360, 960, "Start")
+      .image(gameWidth * 0.25, gameHeight * 0.94, "Start")
       .setOrigin(0.5)
-      .setDisplaySize(150, 80)
+      .setDisplaySize(gameWidth * 0.1, gameHeight * 0.08)
       .setDepth(1)
-      .setInteractive({
-        useHandCursor: false,
-        // cursor: "url('/assets/images/cursor_hand.png'), pointer",
-      });
+      .setInteractive({ useHandCursor: false });
 
     this.isStartButtonDisabled = false;
     this.startButton.on("pointerdown", () => {
@@ -159,7 +157,14 @@ export class LuckyDrawView {
     this.people = null;
 
     this.transitionOverlay = this.scene.add
-      .rectangle(720, 512, 1440, 1024, 0x000000, 1)
+      .rectangle(
+        gameWidth / 2,
+        gameHeight / 2,
+        gameWidth,
+        gameHeight,
+        0x000000,
+        1
+      )
       .setDepth(100)
       .setAlpha(0);
   }
@@ -197,7 +202,7 @@ export class LuckyDrawView {
     if (this.people && this.people.visible) {
       this.scene.tweens.add({
         targets: this.people,
-        y: 1200,
+        y: this.scene.scale.height * 1.2,
         duration: 420,
         ease: "Cubic.easeIn",
         onComplete: () => {
@@ -211,14 +216,28 @@ export class LuckyDrawView {
   }
 
   showGameScreen(dropBalls: () => void) {
-    this.transitionOverlay?.setAlpha(0);
-    this.curtainLeft.setX(360).setVisible(true).setAlpha(1);
-    this.curtainRight.setX(360).setVisible(true).setAlpha(1);
+    const gameWidth = this.scene.scale.width;
+    const gameHeight = this.scene.scale.height;
 
-    LightshowFrameComponent.start(this.scene, 370, 70, {
-      size: 260,
-      depth: 5,
-    });
+    this.transitionOverlay?.setAlpha(0);
+    this.curtainLeft
+      .setX(gameWidth * 0.25)
+      .setVisible(true)
+      .setAlpha(1);
+    this.curtainRight
+      .setX(gameWidth * 0.25)
+      .setVisible(true)
+      .setAlpha(1);
+
+    LightshowFrameComponent.start(
+      this.scene,
+      gameWidth * 0.257,
+      gameHeight * 0.07,
+      {
+        size: gameWidth * 0.18,
+        depth: 5,
+      }
+    );
 
     this.scene.tweens.add({
       targets: [this.curtainLeft, this.curtainRight],
@@ -231,99 +250,104 @@ export class LuckyDrawView {
           this.thumbnail.setVisible(false);
 
           this.gamescreen = this.scene.add
-            .image(360, 512, "Gamescreen")
+            .image(gameWidth * 0.25, gameHeight / 2, "Gamescreen")
             .setOrigin(0.5)
-            .setDisplaySize(720, 1024)
+            .setDisplaySize(gameWidth * 0.5, gameHeight)
             .setAlpha(1)
             .setDepth(2);
 
           this.people = this.scene.add
-            .image(360, 1200, "People")
+            .image(gameWidth * 0.25, gameHeight * 1.17, "People")
             .setOrigin(0.5)
-            .setDisplaySize(868, 300)
+            .setDisplaySize(gameWidth * 0.6, gameHeight * 0.29)
             .setAlpha(1)
             .setDepth(8)
             .setVisible(true);
 
           this.scene.tweens.add({
             targets: this.people,
-            y: 960,
+            y: gameHeight * 0.94,
             duration: 520,
             ease: "Cubic.easeOut",
           });
 
           this.prizenet = this.scene.add
-            .image(360, 220, "Prizenet")
+            .image(gameWidth * 0.25, gameHeight * 0.21, "Prizenet")
             .setOrigin(0.5)
-            .setDisplaySize(720, 500)
+            .setDisplaySize(gameWidth * 0.5, gameHeight * 0.49)
             .setAlpha(1)
             .setDepth(4);
 
           this.prizenetopen = this.scene.add
-            .image(360, 220, "Prizenetopen")
+            .image(gameWidth * 0.25, gameHeight * 0.21, "Prizenetopen")
             .setOrigin(0.5)
-            .setDisplaySize(720, 500)
+            .setDisplaySize(gameWidth * 0.5, gameHeight * 0.49)
             .setAlpha(0)
             .setDepth(3);
 
           this.transitionOverlay?.setAlpha(0);
 
-          DragMotionComponent.create(this.scene, 360, 18, {
-            size: 10,
-            depth: 6,
-            onDrop: dropBalls,
-            onDragProgress: (progress) => {
-              if (!this.prizenet || !this.prizenetopen) return;
+          DragMotionComponent.create(
+            this.scene,
+            gameWidth * 0.25,
+            gameHeight * 0.018,
+            {
+              size: gameWidth * 0.007,
+              depth: 6,
+              onDrop: dropBalls,
+              onDragProgress: (progress) => {
+                if (!this.prizenet || !this.prizenetopen) return;
 
-              if (progress > 0.65 && !this.isNetOpen && !this.isNetSliding) {
-                this.isNetSliding = true;
+                if (progress > 0.65 && !this.isNetOpen && !this.isNetSliding) {
+                  this.isNetSliding = true;
 
-                this.scene.tweens.add({
-                  targets: this.prizenet,
-                  y: 20,
-                  alpha: 0,
-                  duration: 350,
-                  ease: "Cubic.easeIn",
-                });
+                  this.scene.tweens.add({
+                    targets: this.prizenet,
+                    y: gameHeight * 0.02,
+                    alpha: 0,
+                    duration: 350,
+                    ease: "Cubic.easeIn",
+                  });
 
-                this.scene.tweens.add({
-                  targets: this.prizenetopen,
-                  alpha: 1,
-                  duration: 350,
-                  ease: "Cubic.easeIn",
-                  onComplete: () => {
-                    this.isNetOpen = true;
-                    this.isNetSliding = false;
-                  },
-                });
-              } else if (
-                progress <= 0.65 &&
-                this.isNetOpen &&
-                !this.isNetSliding
-              ) {
-                this.isNetSliding = true;
+                  this.scene.tweens.add({
+                    targets: this.prizenetopen,
+                    alpha: 1,
+                    duration: 350,
+                    ease: "Cubic.easeIn",
+                    onComplete: () => {
+                      this.isNetOpen = true;
+                      this.isNetSliding = false;
+                    },
+                  });
+                } else if (
+                  progress <= 0.65 &&
+                  this.isNetOpen &&
+                  !this.isNetSliding
+                ) {
+                  this.isNetSliding = true;
 
-                this.scene.tweens.add({
-                  targets: this.prizenet,
-                  y: 20,
-                  alpha: 1,
-                  duration: 350,
-                  ease: "Cubic.easeOut",
-                });
+                  this.scene.tweens.add({
+                    targets: this.prizenet,
+                    y: gameHeight * 0.02,
+                    alpha: 1,
+                    duration: 350,
+                    ease: "Cubic.easeOut",
+                  });
 
-                this.scene.tweens.add({
-                  targets: this.prizenetopen,
-                  alpha: 0,
-                  duration: 350,
-                  ease: "Cubic.easeOut",
-                  onComplete: () => {
-                    this.isNetOpen = false;
-                    this.isNetSliding = false;
-                  },
-                });
-              }
-            },
-          });
+                  this.scene.tweens.add({
+                    targets: this.prizenetopen,
+                    alpha: 0,
+                    duration: 350,
+                    ease: "Cubic.easeOut",
+                    onComplete: () => {
+                      this.isNetOpen = false;
+                      this.isNetSliding = false;
+                    },
+                  });
+                }
+              },
+            }
+          );
 
           this.openCurtain();
         });
@@ -370,12 +394,14 @@ export class LuckyDrawView {
   }
 
   showStageLabel(stageIdx: number) {
+    const gameWidth = this.scene.scale.width;
+    const gameHeight = this.scene.scale.height;
     const stageTitleKey = stageTitleImages[stageIdx] || "Stage1";
     const image = this.scene.add
-      .image(360, 430, stageTitleKey)
+      .image(gameWidth * 0.25, gameHeight * 0.42, stageTitleKey)
       .setOrigin(0.5)
       .setDepth(200)
-      .setDisplaySize(315, 35);
+      .setDisplaySize(gameWidth * 0.22, gameHeight * 0.034);
     this.scene.tweens.add({
       targets: image,
       alpha: 0,
@@ -400,10 +426,13 @@ export class LuckyDrawView {
   }
 
   showGameCompleteSummary() {
-    const panelX = 360;
-    const panelY = 512;
-    const panelWidth = 720;
-    const panelHeight = 1024;
+    const gameWidth = this.scene.scale.width;
+    const gameHeight = this.scene.scale.height;
+
+    const panelX = gameWidth * 0.25;
+    const panelY = gameHeight / 2;
+    const panelWidth = gameWidth * 0.5;
+    const panelHeight = gameHeight;
     const objects: Phaser.GameObjects.GameObject[] = [];
 
     const blurImage = this.scene.add
@@ -414,8 +443,8 @@ export class LuckyDrawView {
       .setAlpha(1);
     objects.push(blurImage);
 
-    const posterX = 1080;
-    const posterY = 512;
+    const posterX = gameWidth * 0.75;
+    const posterY = gameHeight / 2;
     const posterImage = this.scene.add
       .image(posterX, posterY, "Poster")
       .setOrigin(0.5)
@@ -423,23 +452,18 @@ export class LuckyDrawView {
       .setDepth(1501);
     objects.push(posterImage);
 
-    const labelHeight = 88;
-    const labelWidth = 224;
-    const spacingAfterLabel = 38;
-    const stageBlockPaddingY = 36;
-    const CARD_W = 157;
-    const CARD_H = 49;
-    const GAP_X = 10;
-    const GAP_Y = 10;
+    const labelHeight = gameHeight * 0.086;
+    const labelWidth = gameWidth * 0.16;
+    const spacingAfterLabel = gameHeight * 0.037;
+    const stageBlockPaddingY = gameHeight * 0.035;
+    const CARD_W = gameWidth * 0.11;
+    const CARD_H = gameHeight * 0.048;
+    const GAP_X = gameWidth * 0.007;
+    const GAP_Y = gameHeight * 0.01;
     const COLUMNS = 4;
 
-    let currY = 35;
+    let currY = gameHeight * 0.034;
 
-    const stageLabelImages = [
-      "stage_label_iphone",
-      "stage_label_aojiru",
-      "stage_label_giftbox",
-    ];
     const reversedStages = [...this.stageWinners].reverse();
 
     reversedStages.forEach((stage, i) => {
@@ -450,7 +474,7 @@ export class LuckyDrawView {
         const labelObj = this.scene.add
           .image(panelX, currY + labelHeight / 2, labelImageKey)
           .setOrigin(0.5)
-          .setDisplaySize(labelWidth, labelHeight)
+          .setDisplaySize(labelWidth, labelHeight + 20)
           .setDepth(1502);
         objects.push(labelObj);
       }
@@ -506,15 +530,18 @@ export class LuckyDrawView {
     this.collectedPrizeGraphics.forEach((c) => c.destroy());
     this.collectedPrizeGraphics = [];
 
+    const gameWidth = this.scene.scale.width;
+    const gameHeight = this.scene.scale.height;
+
     const columns = 3;
-    const cardWidth = 200;
-    const cardHeight = 65;
-    const gap = 10;
+    const cardWidth = gameWidth * 0.14;
+    const cardHeight = gameHeight * 0.063;
+    const gap = gameWidth * 0.007;
     const cardSpacingX = cardWidth + gap;
     const cardSpacingY = cardHeight + gap;
 
-    const baseX = 870;
-    const baseY = 320;
+    const baseX = gameWidth * 0.6;
+    const baseY = gameHeight * 0.32;
 
     prizes.forEach((prize, i) => {
       const col = i % columns;

@@ -9,20 +9,24 @@ export class WinnerPanelComponent {
     onNext: () => void,
     stageLabelKey: string
   ): Phaser.GameObjects.GameObject[] {
-    const panelX = 360;
-    const panelY = 512;
-    const panelWidth = 720;
-    const panelHeight = 1024;
+    const gameWidth = scene.scale.width;
+    const gameHeight = scene.scale.height;
+
+    const panelX = gameWidth * 0.25;
+    const panelY = gameHeight / 2;
+    const panelWidth = gameWidth * 0.5;
+    const panelHeight = gameHeight;
 
     const columns = 3;
-    const cardWidth = 200;
-    const cardHeight = 65;
-    const gap = 15;
-    const labelHeight = 88;
-    const labelWidth = 224;
-    const spacingAfterLabel = 24;
-    const spacingAfterGrid = 32;
-    const btnHeight = 80;
+    const cardWidth = gameWidth * 0.14;
+    const cardHeight = gameHeight * 0.063;
+    const gap = gameWidth * 0.01;
+    const labelHeight = gameHeight * 0.086;
+    const labelWidth = gameWidth * 0.16;
+    const spacingAfterLabel = gameHeight * 0.024;
+    const spacingAfterGrid = gameHeight * 0.032;
+    const btnHeight = gameHeight * 0.078;
+    const nextBtnWidth = gameWidth * 0.085;
 
     const numRows =
       prizes.length === 1 ? 1 : Math.ceil(prizes.length / columns);
@@ -47,8 +51,8 @@ export class WinnerPanelComponent {
       .setDepth(1299)
       .setAlpha(1);
 
-    const posterX = 1080;
-    const posterY = 512;
+    const posterX = gameWidth * 0.75;
+    const posterY = gameHeight / 2;
     const posterImage = scene.add
       .image(posterX, posterY, "Poster")
       .setOrigin(0.5)
@@ -58,7 +62,7 @@ export class WinnerPanelComponent {
     const stageLabelImage = scene.add
       .image(panelX, currY + labelHeight / 2, stageLabelKey)
       .setOrigin(0.5)
-      .setDisplaySize(labelWidth, labelHeight)
+      .setDisplaySize(labelWidth, labelHeight + 20)
       .setDepth(1301)
       .setAlpha(1);
 
@@ -101,7 +105,7 @@ export class WinnerPanelComponent {
     const nextBtnImage = scene.add
       .image(panelX, currY + btnHeight / 2, "Next")
       .setOrigin(0.5)
-      .setDisplaySize(150, btnHeight)
+      .setDisplaySize(nextBtnWidth, btnHeight)
       .setDepth(1301)
       .setAlpha(1)
       .setInteractive({ useHandCursor: true });

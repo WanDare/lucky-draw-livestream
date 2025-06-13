@@ -7,17 +7,28 @@ export class CurtainComponent {
     curtainRight: Phaser.GameObjects.Image,
     onDone?: () => void
   ) {
+    const gameWidth = scene.scale.width;
+
+    // These percentages match the original hardcoded values (360, 310, 720) for a base width of 1440:
+    // 0, 310/1440 ≈ 0.215, 360/1440 = 0.25, 720/1440 = 0.5
+
     curtainLeft.setX(0).setVisible(true).setAlpha(1).setDepth(7);
-    curtainRight.setX(720).setVisible(true).setAlpha(1).setDepth(7);
+    curtainRight
+      .setX(gameWidth * 0.5)
+      .setVisible(true)
+      .setAlpha(1)
+      .setDepth(7);
+
     scene.tweens.add({
       targets: curtainLeft,
-      x: 360,
+      x: gameWidth * 0.25,
       duration: 1500,
       ease: "Cubic.easeInOut",
     });
+
     scene.tweens.add({
       targets: curtainRight,
-      x: 310,
+      x: gameWidth * 0.215,
       duration: 1500,
       ease: "Cubic.easeInOut",
       onComplete: () => {
@@ -32,8 +43,18 @@ export class CurtainComponent {
     curtainRight: Phaser.GameObjects.Image,
     onDone?: () => void
   ) {
-    curtainLeft.setX(360).setVisible(true).setAlpha(1).setDepth(7);
-    curtainRight.setX(310).setVisible(true).setAlpha(1).setDepth(7);
+    const gameWidth = scene.scale.width;
+
+    curtainLeft
+      .setX(gameWidth * 0.25)
+      .setVisible(true)
+      .setAlpha(1)
+      .setDepth(7);
+    curtainRight
+      .setX(gameWidth * 0.215)
+      .setVisible(true)
+      .setAlpha(1)
+      .setDepth(7);
 
     let finished = 0;
     function finish() {
@@ -48,14 +69,14 @@ export class CurtainComponent {
     scene.tweens.add({
       targets: curtainLeft,
       x: 0,
-      duration: 5000,
+      duration: 1500,
       ease: "Cubic.easeInOut",
       onComplete: finish,
     });
     scene.tweens.add({
       targets: curtainRight,
-      x: 720,
-      duration: 5000,
+      x: gameWidth * 0.5,
+      duration: 1500,
       ease: "Cubic.easeInOut",
       onComplete: finish,
     });
