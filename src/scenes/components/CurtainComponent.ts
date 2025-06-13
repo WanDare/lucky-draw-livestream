@@ -48,14 +48,14 @@ export class CurtainComponent {
     scene.tweens.add({
       targets: curtainLeft,
       x: 0,
-      duration: 5500,
+      duration: 5000,
       ease: "Cubic.easeInOut",
       onComplete: finish,
     });
     scene.tweens.add({
       targets: curtainRight,
       x: 720,
-      duration: 5500,
+      duration: 5000,
       ease: "Cubic.easeInOut",
       onComplete: finish,
     });

@@ -1,6 +1,10 @@
 import Phaser from "phaser";
 import type { PrizeInfo } from "../model/lucky_draw_model";
 
+function maskPhone(phone: string): string {
+  return phone.replace(/(\d{3}\s?\d{2})(\d{6})(\d{2})/, "$1XXXXXX$3");
+}
+
 export class PrizeCardComponent {
   static create(
     scene: Phaser.Scene,
@@ -21,19 +25,21 @@ export class PrizeCardComponent {
         color: "#ffffff",
         align: "center",
         fontStyle: "bold",
+        letterSpacing: -0.32,
       })
       .setOrigin(0.5);
 
     const phoneText = scene.add
-      .text(0, height / 6, prize.phone.toUpperCase(), {
+      .text(0, height / 6, maskPhone(prize.phone.toUpperCase()), {
         font: `bold ${Math.max(14, height / 3.2)}px Poppins`,
         color: "#ffffff",
         align: "center",
         fontStyle: "bold",
+        letterSpacing: -0.4,
       })
       .setOrigin(0.5);
 
-   const container = scene.add.container(x, y, [cardBg, nameText, phoneText]);
+    const container = scene.add.container(x, y, [cardBg, nameText, phoneText]);
     container.setDepth(22);
 
     container.setScale(0.7).setAlpha(0);

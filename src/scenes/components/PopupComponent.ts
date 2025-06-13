@@ -2,6 +2,10 @@ import Phaser from "phaser";
 import type { PrizeInfo } from "../model/lucky_draw_model";
 import { launchConfetti } from "../effects/confetti";
 
+function maskPhone(phone: string): string {
+  return phone.replace(/(\d{3}\s?\d{2})(\d{6})(\d{2})/, "$1XXXXXX$3");
+}
+
 export class PopupComponent {
   static showCongrat(
     scene: Phaser.Scene,
@@ -23,21 +27,28 @@ export class PopupComponent {
       .setAlpha(0);
 
     const nameText = scene.add
-      .text(width / 2 + 40, height - 485, prize.name, {
+      .text(width / 2 + 40, height - 485, prize.name.toUpperCase(), {
         font: "bold 16px Arial",
         color: "#538B3C",
         align: "center",
+        letterSpacing: -0.32,
       })
       .setOrigin(0.5)
       .setDepth(2001)
       .setAlpha(0);
 
     const phoneText = scene.add
-      .text(width / 2 + 40, height - 455, prize.phone, {
-        font: "bold 24px Arial",
-        color: "#538B3C",
-        align: "center",
-      })
+      .text(
+        width / 2 + 40,
+        height - 455,
+        maskPhone(prize.phone.toUpperCase()),
+        {
+          font: "bold 24px Arial",
+          color: "#538B3C",
+          align: "center",
+          letterSpacing: -0.48,
+        }
+      )
       .setOrigin(0.5)
       .setDepth(2001)
       .setAlpha(0);

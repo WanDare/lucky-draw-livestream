@@ -92,7 +92,7 @@ export class LuckyDrawController {
 
   async fetchRandomPrizeInfo(): Promise<PrizeInfo> {
     const res = await fetch(
-      `${API_BASE_URL}/064452bf-cb44-41ff-babb-824d7051cfde`
+      `${API_BASE_URL}/7f5f5d5f-168b-404c-bec0-d226ccc4763e`
     );
     if (!res.ok) throw new Error("Failed to fetch prize info");
     const data = await res.json();
@@ -108,29 +108,23 @@ export class LuckyDrawController {
       this.ballSpawnTimer = undefined;
     }
 
-    const spawnBalls = () => {
-      if (this.model.getPrizes().length >= this.maxCollect) {
-        if (this.ballSpawnTimer) {
-          this.ballSpawnTimer.remove(false);
+    this.ballSpawnTimer = this.scene.time.addEvent({
+      delay: 300,
+      loop: true,
+      callback: () => {
+        if (this.model.getPrizes().length >= this.maxCollect) {
+          this.ballSpawnTimer?.remove(false);
           this.ballSpawnTimer = undefined;
+          return;
         }
-        return;
-      }
-
-      while (
-        this.ballPairs.length < this.maxBallsOnScreen &&
-        this.model.getPrizes().length < this.maxCollect
-      ) {
-        this.spawnBall();
-      }
-
-      this.scene.time.addEvent({
-        delay: 0,
-        callback: spawnBalls,
-      });
-    };
-
-    spawnBalls();
+        while (
+          this.ballPairs.length < this.maxBallsOnScreen &&
+          this.model.getPrizes().length < this.maxCollect
+        ) {
+          this.spawnBall();
+        }
+      },
+    });
   }
 
   spawnBall() {
@@ -232,6 +226,9 @@ export class LuckyDrawController {
         pair.ball.disableInteractive();
       }
     });
+    if (this.ballSpawnTimer && !this.ballSpawnTimer.paused) {
+      this.ballSpawnTimer.paused = true;
+    }
   }
 
   resumeAllBalls() {
@@ -241,6 +238,9 @@ export class LuckyDrawController {
         pair.ball.setInteractive({ useHandCursor: true });
       }
     });
+    if (this.ballSpawnTimer && this.ballSpawnTimer.paused) {
+      this.ballSpawnTimer.paused = false;
+    }
   }
 
   onStageComplete() {

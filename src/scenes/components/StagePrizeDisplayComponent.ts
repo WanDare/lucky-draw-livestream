@@ -16,9 +16,9 @@ export class StagePrizeDisplayComponent {
     const topY = background2.y - background2.displayHeight / 2 + 30;
 
     const displayPrizeBg = scene.add
-      .image(centerX, topY + 110, "Displayprize")
+      .image(centerX, topY + 95, "Displayprize")
       .setOrigin(0.5, 0)
-      .setDisplaySize(345, 114)
+      .setDisplaySize(420, 130)
       .setAlpha(0)
       .setDepth(background2.depth + 1);
 
@@ -57,17 +57,17 @@ export class StagePrizeDisplayComponent {
 
     const nameText = scene.add
       .text(0, 25, prizeConfig.name.toUpperCase(), {
-        font: "bold 12px Arial",
+        font: "bold 16px Poppins",
         color: "#ffffff",
         align: "center",
-        fontStyle: "bold",
-        fontSize: "24px",
+        fontStyle: "normal",
+        letterSpacing: -0.32,
       })
       .setOrigin(0.5);
 
     const valueText = scene.add
       .text(0, 45, prizeConfig.value.toUpperCase(), {
-        font: "bold 14px Arial",
+        font: "bold 16px Poppins",
         color: "#ffffff",
         align: "center",
         fontStyle: "bold",
@@ -92,7 +92,7 @@ export class StagePrizeDisplayComponent {
     scene.tweens.add({
       targets: prizeImg,
       alpha: 1,
-      y: topY + 5,
+      y: topY,
       duration: 360,
       delay: 100,
       ease: "Back.Out",
