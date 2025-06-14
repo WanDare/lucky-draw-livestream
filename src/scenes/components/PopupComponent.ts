@@ -29,7 +29,6 @@ export class PopupComponent {
     const nameFontSize = Math.max(20);
     const phoneFontSize = Math.max(28);
 
-    // Move name/phone vertically as a percentage
     const nameText = scene.add
       .text(width / 2 + 50, height * 0.52, prize.name.toUpperCase(), {
         font: `bold ${nameFontSize}px Arial`,
@@ -144,5 +143,105 @@ export class PopupComponent {
         });
       },
     });
+  }
+
+  static showConfirm(
+    scene: Phaser.Scene,
+    message: string,
+    confirmText: string,
+    cancelText: string,
+    onConfirm: () => void,
+    onCancel: () => void
+  ) {
+    const { width, height } = scene.scale;
+
+    const overlay = scene.add
+      .rectangle(width / 2, height / 2, width, height, 0x000000, 0.5)
+      .setDepth(900);
+
+    const panel = scene.add
+      .image(width / 2, height / 2, "card_bg")
+      .setOrigin(0.5)
+      .setDisplaySize(width * 0.4, height * 0.25)
+      .setDepth(901);
+
+    const text = scene.add
+      .text(width / 2, height / 2 - 40, message, {
+        font: `bold ${Math.max(24, height * 0.03)}px Arial`,
+        color: "#ffffff",
+        align: "center",
+        wordWrap: { width: width * 0.5 },
+      })
+      .setOrigin(0.5)
+      .setDepth(902);
+
+    const buttonWidth = 128;
+    const buttonHeight = 48;
+
+    const createButton = (
+      x: number,
+      y: number,
+      bgColor: number,
+      label: string,
+      onClick: () => void
+    ) => {
+      const bg = scene.add.graphics();
+      bg.fillStyle(bgColor, 1);
+      bg.fillRoundedRect(
+        -buttonWidth / 2,
+        -buttonHeight / 2,
+        buttonWidth,
+        buttonHeight,
+        12
+      );
+
+      const btnText = scene.add
+        .text(0, 0, label, {
+          font: "20px Arial",
+          color: "#ffffff",
+          align: "center",
+        })
+        .setOrigin(0.5);
+
+      const hitZone = scene.add
+        .zone(0, 0, buttonWidth, buttonHeight)
+        .setOrigin(0.5)
+        .setInteractive({ useHandCursor: true });
+
+      const container = scene.add
+        .container(x, y, [bg, btnText, hitZone])
+        .setDepth(902);
+
+      hitZone.on("pointerdown", () => {
+        destroyAll();
+        onClick();
+      });
+
+      return container;
+    };
+
+    const yesButton = createButton(
+      width / 2 - 100,
+      height / 2 + 40,
+      0x00aa66,
+      confirmText,
+      onConfirm
+    );
+
+    const noButton = createButton(
+      width / 2 + 100,
+      height / 2 + 40,
+      0xaa0000,
+      cancelText,
+      onCancel
+    );
+
+    const destroyAll = () => {
+      overlay.destroy();
+      panel.destroy();
+      text.destroy();
+      yesButton.destroy();
+      noButton.destroy();
+    };
   }
 }

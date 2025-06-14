@@ -65,6 +65,7 @@ export class LuckyDrawView {
       // Button
       ["Start", "assets/images/start_button.png"],
       ["Next", "assets/images/next_button.png"],
+      ["BackMenu", "assets/images/back_to_menu.png"],
       // Display Prizes item
       ["Prize", "assets/images/prizes/prize7.png"],
       ["Prize2", "assets/images/prizes/prize6.png"],
@@ -523,6 +524,37 @@ export class LuckyDrawView {
       }
 
       currY += stageBlockPaddingY;
+    });
+
+    const transition = this.scene.add
+      .rectangle(0, 0, gameWidth, gameHeight, 0x000000)
+      .setOrigin(0)
+      .setAlpha(0)
+      .setDepth(2000);
+
+    const backBtnWidth = gameWidth * 0.06;
+    const backBtnHeight = gameHeight * 0.06;
+
+    const backBtn = this.scene.add
+      .image(
+        backBtnWidth / 2 + gameWidth * 0.015,
+        backBtnHeight / 2 + gameHeight * 0.025,
+        "BackMenu"
+      )
+      .setOrigin(0.5)
+      .setDisplaySize(backBtnWidth, backBtnHeight)
+      .setDepth(1503)
+      .setInteractive({ useHandCursor: true });
+
+    backBtn.on("pointerdown", () => {
+      this.scene.tweens.add({
+        targets: transition,
+        alpha: 1,
+        duration: 500,
+        onComplete: () => {
+          this.scene.scene.restart();
+        },
+      });
     });
   }
 

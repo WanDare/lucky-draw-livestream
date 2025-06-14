@@ -1,7 +1,8 @@
-export type PrizeInfo = {
+export interface PrizeInfo {
+  phone: any;
+  id: number;
   name: string;
-  phone: string;
-};
+}
 
 export class PrizeModel {
   private collected: PrizeInfo[] = [];
@@ -16,5 +17,9 @@ export class PrizeModel {
 
   clearPrizes() {
     this.collected = [];
+  }
+
+  setPrizes(prizes: PrizeInfo[]) {
+    this.collected = [...prizes]; // safely copy
   }
 }

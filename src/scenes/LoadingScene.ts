@@ -45,12 +45,10 @@ export default class LoadingScene extends Phaser.Scene {
 
     this.progressBar = this.add.graphics();
 
-    // Actually load assets (simulate longer loading for demo)
     for (let i = 0; i < 30; i++) {
       this.load.image(`dummy${i}`, "assets/images/ticket_prize.png");
     }
 
-    // Progress bar update
     this.load.on("progress", (value: number) => {
       this.progressBar.clear();
       this.progressBar.fillStyle(0x03792a, 1);

@@ -7,7 +7,7 @@ const config: Phaser.Types.Core.GameConfig = {
   width: 1920,
   height: 1080,
   backgroundColor: "#538b3c",
-  scene: [LuckyDrawScene, LoadingScene],
+  scene: [LoadingScene, LuckyDrawScene],
   parent: "game",
   scale: {
     mode: Phaser.Scale.FIT,

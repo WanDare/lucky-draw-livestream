@@ -1,6 +1,7 @@
 import { API_BASE_URL } from "../utils/constants";
 import type { PrizeModel, PrizeInfo } from "../model/lucky_draw_model";
 import type { LuckyDrawView } from "../view/lucky_draw_view";
+import { PopupComponent } from "../components/PopupComponent";
 
 export class LuckyDrawController {
   private model: PrizeModel;
@@ -34,13 +35,12 @@ export class LuckyDrawController {
 
   private currentStage = 0;
   private maxCollect = 0;
-
   private ballPairs: {
     ball: Phaser.GameObjects.Image;
     tween: Phaser.Tweens.Tween;
   }[] = [];
-
   private ballSpawnTimer?: Phaser.Time.TimerEvent;
+  private stageWinners: PrizeInfo[][] = [];
 
   constructor(model: PrizeModel, view: LuckyDrawView, scene: Phaser.Scene) {
     this.model = model;
@@ -54,37 +54,80 @@ export class LuckyDrawController {
     };
   }
 
-  clearAllBalls() {
-    this.ballPairs.forEach((pair) => {
-      if (pair.tween && pair.tween.isPlaying()) {
-        pair.tween.stop();
-      }
-      if (pair.ball && pair.ball.active) {
-        pair.ball.destroy();
-      }
-    });
-    this.ballPairs = [];
+  private hasSavedGame(): boolean {
+    return !!localStorage.getItem("luckyDrawState");
+  }
 
-    if (this.ballSpawnTimer) {
-      this.ballSpawnTimer.remove(false);
-      this.ballSpawnTimer = undefined;
+  private saveGameState() {
+    const state = {
+      currentStage: this.currentStage,
+      prizes: this.model.getPrizes(),
+      stageWinners: this.stageWinners,
+    };
+    localStorage.setItem("luckyDrawState", JSON.stringify(state));
+  }
+
+  private loadGameState() {
+    const raw = localStorage.getItem("luckyDrawState");
+    if (!raw) return;
+    try {
+      const state = JSON.parse(raw);
+      this.currentStage = state.currentStage ?? 0;
+      this.stageWinners = state.stageWinners ?? [];
+      this.model.setPrizes(state.prizes ?? []);
+    } catch (e) {
+      console.error("Failed to load saved state", e);
     }
   }
 
+  private clearGameState() {
+    localStorage.removeItem("luckyDrawState");
+  }
+
   onStartGame() {
-    this.currentStage = 0;
-    this.curtainStageTransition(() => this.startStage(this.currentStage));
+    if (this.hasSavedGame()) {
+      PopupComponent.showConfirm(
+        this.scene,
+        "Do want to continue the previous game?",
+        "Resume",
+        "Restart",
+        () => {
+          this.loadGameState();
+          this.view.reset();
+          this.stageWinners.forEach((stage) =>
+            this.view.showStageWinnersPanel(stage, () => {})
+          );
+          if (this.currentStage >= this.stages.length) {
+            this.view.showGameCompleteSummary();
+          } else {
+            this.view.renderPrizePanel(this.model.getPrizes());
+          }
+          this.curtainStageTransition(() => this.startStage(this.currentStage));
+        },
+        () => {
+          this.clearGameState();
+          this.currentStage = 0;
+          this.stageWinners = [];
+          this.curtainStageTransition(() => this.startStage(0));
+        }
+      );
+    } else {
+      this.clearGameState();
+      this.currentStage = 0;
+      this.stageWinners = [];
+      this.curtainStageTransition(() => this.startStage(0));
+    }
   }
 
   startStage(stageIdx: number) {
     this.clearAllBalls();
-
-    this.model.clearPrizes();
+    // Skip clearing prizes on resume if already loaded
+    if (this.model.getPrizes().length === 0) {
+      this.model.clearPrizes();
+    }
     this.view.renderPrizePanel(this.model.getPrizes());
     this.maxCollect = this.stages[stageIdx].count;
-
     this.view.showStageLabel?.(stageIdx);
-
     this.view.showGameScreen(() => this.startInfiniteBallDrop());
     this.view.showStagePrize(this.stagePrizes[stageIdx]);
   }
@@ -95,25 +138,19 @@ export class LuckyDrawController {
     );
     if (!res.ok) throw new Error("Failed to fetch prize info");
     const data = await res.json();
-    if (Array.isArray(data)) {
-      return data[Math.floor(Math.random() * data.length)];
-    }
-    return data as PrizeInfo;
+    return Array.isArray(data)
+      ? data[Math.floor(Math.random() * data.length)]
+      : data;
   }
 
   startInfiniteBallDrop() {
-    if (this.ballSpawnTimer) {
-      this.ballSpawnTimer.remove(false);
-      this.ballSpawnTimer = undefined;
-    }
-
+    if (this.ballSpawnTimer) this.ballSpawnTimer.remove(false);
     this.ballSpawnTimer = this.scene.time.addEvent({
       delay: 300,
       loop: true,
       callback: () => {
         if (this.model.getPrizes().length >= this.maxCollect) {
           this.ballSpawnTimer?.remove(false);
-          this.ballSpawnTimer = undefined;
           return;
         }
         this.spawnBall();
@@ -122,14 +159,10 @@ export class LuckyDrawController {
   }
 
   spawnBall() {
-    const gameWidth = this.scene.scale.width;
-    const gameHeight = this.scene.scale.height;
-
-    // Responsive random spawn area (horizontal span, top vertical)
-    const x = Phaser.Math.Between(gameWidth * 0.015, gameWidth * 0.47);
-    const y = gameHeight * 0.16;
-
-    const ballSize = Math.max(gameWidth, gameHeight) * 0.07; // About 70-100px on large screens
+    const { width, height } = this.scene.scale;
+    const x = Phaser.Math.Between(width * 0.015, width * 0.47);
+    const y = height * 0.16;
+    const ballSize = Math.max(width, height) * 0.07;
 
     const ball = this.scene.add
       .image(x, y, "Ball")
@@ -140,20 +173,20 @@ export class LuckyDrawController {
 
     ball.setAngle(Phaser.Math.Between(-45, 45));
 
-    const ballTween = this.scene.tweens.add({
+    const tween = this.scene.tweens.add({
       targets: ball,
-      y: gameHeight * 0.98,
+      y: height * 0.98,
       angle: Phaser.Math.Between(-270, 270),
       ease: "Sine.easeInOut",
       duration: Phaser.Math.Between(8500, 15000),
       delay: Phaser.Math.Between(0, 700),
       onComplete: () => {
-        this.ballPairs = this.ballPairs.filter((pair) => pair.ball !== ball);
+        this.ballPairs = this.ballPairs.filter((p) => p.ball !== ball);
         if (ball.active) ball.destroy();
       },
     });
 
-    this.ballPairs.push({ ball, tween: ballTween });
+    this.ballPairs.push({ ball, tween });
 
     ball.on("pointerdown", async () => {
       if (
@@ -175,28 +208,23 @@ export class LuckyDrawController {
   }
 
   collectPrizeWithAnimation(ball: Phaser.GameObjects.Image, prize: PrizeInfo) {
-    const gameWidth = this.scene.scale.width;
-    const gameHeight = this.scene.scale.height;
+    const { width, height } = this.scene.scale;
     this.pauseAllBalls();
     this.view.showPrizeCongratulation(prize);
 
-    // Responsive grid destination (matches renderPrizePanel layout)
-    const columns = 3;
-    const cardWidth = gameWidth * 0.14;
-    const cardHeight = gameHeight * 0.063;
-    const gap = gameWidth * 0.007;
-    const baseX = gameWidth * 0.6;
-    const baseY = gameHeight * 0.32;
     const idx = this.model.getPrizes().length;
-    const col = idx % columns;
-    const row = Math.floor(idx / columns);
-    const destX = baseX + col * (cardWidth + gap);
-    const destY = baseY + row * (cardHeight + gap);
+    const col = idx % 3;
+    const row = Math.floor(idx / 3);
+    const cardW = width * 0.14;
+    const cardH = height * 0.063;
+    const gap = width * 0.007;
+    const destX = width * 0.6 + col * (cardW + gap);
+    const destY = height * 0.32 + row * (cardH + gap);
 
     const flyBall = this.scene.add
       .image(ball.x, ball.y, "Ball")
       .setOrigin(0.5)
-      .setDisplaySize(cardHeight, cardHeight)
+      .setDisplaySize(cardH, cardH)
       .setDepth(100);
 
     this.scene.tweens.add({
@@ -211,6 +239,7 @@ export class LuckyDrawController {
         flyBall.destroy();
         this.model.addPrize(prize);
         this.view.renderPrizePanel(this.model.getPrizes());
+        this.saveGameState();
         if (this.model.getPrizes().length >= this.maxCollect) {
           this.onStageComplete();
         }
@@ -224,55 +253,65 @@ export class LuckyDrawController {
       duration: 200,
       onComplete: () => {
         ball.destroy();
-        this.ballPairs = this.ballPairs.filter((pair) => pair.ball !== ball);
+        this.ballPairs = this.ballPairs.filter((p) => p.ball !== ball);
       },
     });
   }
 
   pauseAllBalls() {
-    this.ballPairs.forEach((pair) => {
-      if (pair.ball.active && pair.tween && !pair.tween.paused) {
-        pair.tween.pause();
-        pair.ball.disableInteractive();
+    this.ballPairs.forEach((p) => {
+      if (p.ball.active && p.tween && !p.tween.paused) {
+        p.tween.pause();
+        p.ball.disableInteractive();
       }
     });
-    if (this.ballSpawnTimer && !this.ballSpawnTimer.paused) {
-      this.ballSpawnTimer.paused = true;
-    }
+    if (this.ballSpawnTimer) this.ballSpawnTimer.paused = true;
   }
 
   resumeAllBalls() {
-    this.ballPairs.forEach((pair) => {
-      if (pair.ball.active && pair.tween && pair.tween.paused) {
-        pair.tween.resume();
-        pair.ball.setInteractive({ useHandCursor: true });
+    this.ballPairs.forEach((p) => {
+      if (p.ball.active && p.tween && p.tween.paused) {
+        p.tween.resume();
+        p.ball.setInteractive({ useHandCursor: true });
       }
     });
-    if (this.ballSpawnTimer && this.ballSpawnTimer.paused) {
-      this.ballSpawnTimer.paused = false;
-    }
+    if (this.ballSpawnTimer) this.ballSpawnTimer.paused = false;
   }
 
   onStageComplete() {
     this.clearAllBalls();
-    const prizesThisStage = this.model.getPrizes();
-
+    const prizes = this.model.getPrizes();
     this.view.collectedPrizeGraphics.forEach((c) => c.destroy());
     this.view.collectedPrizeGraphics = [];
 
     this.view.slideOutPeople(() => {
-      this.view.showStageWinnersPanel(prizesThisStage, () => {
-        this.currentStage += 1;
+      this.view.showStageWinnersPanel(prizes, () => {
+        this.stageWinners.push([...prizes]);
+        this.currentStage++;
         if (this.currentStage < this.stages.length) {
           this.model.clearPrizes();
+          this.saveGameState();
           this.curtainStageTransition(() => this.startStage(this.currentStage));
         } else {
+          this.clearGameState();
           this.curtainStageTransition(() => {
             this.view.showGameComplete?.();
           });
         }
       });
     });
+  }
+
+  clearAllBalls() {
+    this.ballPairs.forEach((p) => {
+      if (p.tween?.isPlaying()) p.tween.stop();
+      if (p.ball?.active) p.ball.destroy();
+    });
+    this.ballPairs = [];
+    if (this.ballSpawnTimer) {
+      this.ballSpawnTimer.remove(false);
+      this.ballSpawnTimer = undefined;
+    }
   }
 
   private curtainStageTransition(action: () => void) {
