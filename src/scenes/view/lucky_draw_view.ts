@@ -51,7 +51,7 @@ export class LuckyDrawView {
   preload() {
     const images = [
       // Core and Background Images
-      ["background1", "assets/images/poster_thumbnail.png"],
+      ["background1", "assets/images/poster_thumbnail1.png"],
       ["background2", "assets/images/streaming_background.png"],
       ["Thumbnail", "assets/images/thumbnail.png"],
       ["Poster", "assets/images/poster.png"],

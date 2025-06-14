@@ -1,16 +1,21 @@
 import { defineConfig } from "vite";
+import viteCompression from "vite-plugin-compression";
 
 export default defineConfig({
   base: "/lucky-draw-livestream/",
   server: {
-    port: 3000, // Development server port
+    port: 3000,
   },
   build: {
-    outDir: "dist", // Output directory for build
+    outDir: "dist",
     rollupOptions: {
       output: {
-        format: "es", // ES module format
+        format: "es",
+        manualChunks: {
+          phaser: ["phaser"],
+        },
       },
     },
   },
+  plugins: [viteCompression()],
 });
