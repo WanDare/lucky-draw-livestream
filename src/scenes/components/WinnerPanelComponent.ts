@@ -24,7 +24,6 @@ export class WinnerPanelComponent {
     const cardHeight = gameHeight * 0.058;
     const gap = gameWidth * 0.01;
     const labelHeight = gameHeight * 0.086;
-    const labelWidth = gameWidth * 0.16;
     const spacingAfterLabel = gameHeight * 0.024;
     const spacingAfterGrid = gameHeight * 0.032;
     const btnHeight = gameHeight * 0.078;
@@ -122,7 +121,7 @@ export class WinnerPanelComponent {
     const objects: Phaser.GameObjects.GameObject[] = [
       blurImage,
       posterImage,
-      stageLabel, 
+      stageLabel,
       container,
       nextBtnImage,
     ];
