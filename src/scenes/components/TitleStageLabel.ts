@@ -59,7 +59,7 @@ function createGradientTexture(
  * Render a single line of gradient-filled text as a Phaser container.
  * Supports shadow, stroke, and other style props.
  */
-function createGradientText(
+export function createGradientText(
   scene: Phaser.Scene,
   x: number,
   y: number,

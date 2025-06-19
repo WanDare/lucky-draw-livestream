@@ -16,6 +16,7 @@ export default class LoadingScene extends Phaser.Scene {
     this.progressBox = this.add.graphics();
     this.progressBox.fillStyle(0x222222, 0.8);
     this.progressBox.fillRect(width / 2 - 170, height / 2 - 30, 340, 60);
+    this.progressBar = this.add.graphics();
 
     this.loadingText = this.make
       .text({
@@ -23,7 +24,7 @@ export default class LoadingScene extends Phaser.Scene {
         y: height / 2 - 50,
         text: "Loading...",
         style: {
-          font: "Bold 28px Arial",
+          font: "bold 28px Arial",
           color: "#ffffff",
           align: "center",
         },
@@ -39,11 +40,17 @@ export default class LoadingScene extends Phaser.Scene {
           font: "24px Arial",
           color: "#ffffff",
           align: "center",
+          shadow: {
+            offsetX: 1,
+            offsetY: 1,
+            color: "#000000",
+            blur: 2,
+            stroke: false,
+            fill: true,
+          },
         },
       })
       .setOrigin(0.5);
-
-    this.progressBar = this.add.graphics();
 
     for (let i = 0; i < 30; i++) {
       this.load.image(`dummy${i}`, "assets/images/ticket_prize.png");

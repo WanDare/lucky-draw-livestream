@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { createGradientText } from "../components/TitleStageLabel";
 
 type OnDropCallback = () => void;
 type OnDragCallback = (progress: number) => void;
@@ -27,11 +28,29 @@ export class DragMotionComponent {
       .setAlpha(1)
       .setInteractive({ draggable: true, useHandCursor: true });
 
-    const dragText = scene.add
-      .image(0, 100, "DragText")
-      .setOrigin(0.5, 0)
-      .setDisplaySize(428, 60)
-      .setDepth(depth);
+    const dragText = createGradientText(
+      scene,
+      0,
+      130,
+      "ចាប់ផ្តើមចាប់សន្លឹកឆ្នោត",
+      34,
+      428,
+      "Kantumruy Pro",
+      "bold",
+      ["#FFF7D5", "#FFFFFF", "#FDF5DB"],
+      {
+        stroke: "#765934",
+        strokeThickness: 2,
+        shadow: {
+          offsetX: 1,
+          offsetY: 2,
+          color: "#765934",
+          blur: 0,
+          stroke: true,
+          fill: true,
+        },
+      }
+    );
 
     const container = scene.add
       .container(x, 300, [dragImage, dragText])

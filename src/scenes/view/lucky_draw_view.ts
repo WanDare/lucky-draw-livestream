@@ -14,6 +14,7 @@ import {
   createTitleStageLabel,
   type TitlePart,
 } from "../components/TitleStageLabel";
+import { DisabledCardComponent } from "../components/DisabledCardComponent";
 
 const stageTitles = [
   "អបអរសាទរអ្នកឈ្នះរង្វាន់",
@@ -48,7 +49,10 @@ export class LuckyDrawView {
   curtainLeft!: Phaser.GameObjects.Image;
   curtainRight!: Phaser.GameObjects.Image;
   transitionOverlay!: Phaser.GameObjects.Rectangle | null;
-  collectedPrizeGraphics: Phaser.GameObjects.Container[] = [];
+  collectedPrizeGraphics: (
+    | Phaser.GameObjects.Image
+    | Phaser.GameObjects.Container
+  )[] = [];
   stageWinners: PrizeInfo[][] = [];
   private stagePrizeGraphics: Phaser.GameObjects.GameObject[] = [];
   private isStartButtonDisabled = false;
@@ -75,6 +79,7 @@ export class LuckyDrawView {
       ["Ball", "assets/images/ticket_prize.png"],
       ["Congrat", "assets/images/popup_winner_screen.png"],
       ["card_bg", "assets/images/display_winner.png"],
+      ["Disable_card", "assets/images/disable_card.png"],
       ["Prize_card", "assets/images/price_cardbg.png"],
       ["Displayprize", "assets/images/display_prize.png"],
       ["People", "assets/images/people.png"],
@@ -645,7 +650,7 @@ export class LuckyDrawView {
     });
   }
 
-  renderPrizePanel(prizes: PrizeInfo[]) {
+  renderPrizePanel(prizes: PrizeInfo[], totalCards: number) {
     this.collectedPrizeGraphics.forEach((c) => c.destroy());
     this.collectedPrizeGraphics = [];
 
@@ -662,20 +667,25 @@ export class LuckyDrawView {
     const baseX = gameWidth * 0.574;
     const baseY = gameHeight * 0.32;
 
-    prizes.forEach((prize, i) => {
+    for (let i = 0; i < totalCards; i++) {
       const col = i % columns;
       const row = Math.floor(i / columns);
       const x = baseX + col * cardSpacingX;
       const y = baseY + row * cardSpacingY;
-      const card = PrizeCardComponent.create(
-        this.scene,
-        x,
-        y,
-        prize,
-        cardWidth,
-        cardHeight
-      );
+
+      const prize = prizes[i];
+      const card = prize
+        ? PrizeCardComponent.create(
+            this.scene,
+            x,
+            y,
+            prize,
+            cardWidth,
+            cardHeight
+          )
+        : DisabledCardComponent.create(this.scene, x, y, cardWidth, cardHeight);
+
       this.collectedPrizeGraphics.push(card);
-    });
+    }
   }
 }

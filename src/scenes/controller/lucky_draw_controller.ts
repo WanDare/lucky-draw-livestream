@@ -107,7 +107,8 @@ export class LuckyDrawController {
           if (this.currentStage >= this.stages.length) {
             this.view.showGameCompleteSummary();
           } else {
-            this.view.renderPrizePanel(this.model.getPrizes());
+            const stageCount = this.stages[this.currentStage].count;
+            this.view.renderPrizePanel(this.model.getPrizes(), stageCount);
           }
           this.curtainStageTransition(() => this.startStage(this.currentStage));
         },
@@ -128,11 +129,11 @@ export class LuckyDrawController {
 
   startStage(stageIdx: number) {
     this.clearAllBalls();
-    // Skip clearing prizes on resume if already loaded
     if (this.model.getPrizes().length === 0) {
       this.model.clearPrizes();
     }
-    this.view.renderPrizePanel(this.model.getPrizes());
+    const stageCount = this.stages[this.currentStage].count;
+    this.view.renderPrizePanel(this.model.getPrizes(), stageCount);
     this.maxCollect = this.stages[stageIdx].count;
     this.view.showStageLabel?.(stageIdx);
     this.view.showGameScreen(() => this.startInfiniteBallDrop());
@@ -245,7 +246,8 @@ export class LuckyDrawController {
       onComplete: () => {
         flyBall.destroy();
         this.model.addPrize(prize);
-        this.view.renderPrizePanel(this.model.getPrizes());
+        const stageCount = this.stages[this.currentStage].count;
+        this.view.renderPrizePanel(this.model.getPrizes(), stageCount);
         this.saveGameState();
         if (this.model.getPrizes().length >= this.maxCollect) {
           this.onStageComplete();
