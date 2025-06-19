@@ -16,64 +16,56 @@ export class StagePrizeDisplayComponent {
     const topY = background2.y - background2.displayHeight / 2 + 30;
 
     const displayPrizeBg = scene.add
-      .image(centerX, topY + 95, "Displayprize")
+      .image(centerX, topY + 143, "Displayprize")
       .setOrigin(0.5, 0)
-      .setDisplaySize(420, 130)
+      .setDisplaySize(270, 80)
       .setAlpha(0)
       .setDepth(background2.depth + 1);
 
     const prizeImg = scene.add
       .image(centerX, 220, prizeConfig.image)
       .setOrigin(0.5, 0)
-      .setDisplaySize(176, 165)
+      .setDisplaySize(154, 161)
       .setAlpha(0)
       .setDepth(background2.depth + 2);
 
-    const cardWidth = 200;
+    const cardWidth = 175;
     const cardHeight = 64;
-    const borderRadius = 14;
-    const cardY = topY + 160;
+    const cardY = topY + 190;
 
-    const cardBg = scene.add.graphics();
-    cardBg.lineStyle(3, 0xf9ffb2, 0.85);
-    cardBg.strokeRoundedRect(
-      -cardWidth / 2,
-      -cardHeight / 2,
-      cardWidth,
-      cardHeight,
-      borderRadius
-    );
-    cardBg.fillStyle(0x214e16, 1);
-    cardBg.fillRoundedRect(
-      -cardWidth / 2,
-      -cardHeight / 2,
-      cardWidth,
-      cardHeight,
-      borderRadius
-    );
-    cardBg.setPosition(centerX, cardY);
-    cardBg.setAlpha(0);
-    cardBg.setDepth(background2.depth + 3);
-
-    const nameText = scene.add
-      .text(0, 25, prizeConfig.name.toUpperCase(), {
-        font: "bold 16px Poppins",
-        color: "#ffffff",
-        align: "center",
-        fontStyle: "normal",
-        letterSpacing: -0.32,
-      })
+    const cardBg = scene.add
+      .image(0, 0, "Prize_card")
+      .setDisplaySize(cardWidth, cardHeight)
       .setOrigin(0.5);
 
+    const nameText = scene.add
+      .text(0, 0, prizeConfig.name.toUpperCase(), {
+        fontSize: 16,
+        fontFamily: "Poppins",
+        fontStyle: "bold",
+        color: "#ffffff",
+        align: "center",
+        letterSpacing: -0.32,
+        wordWrap: { width: cardWidth - 16, useAdvancedWrap: true },
+      })
+      .setOrigin(0.5, 0);
+
     const valueText = scene.add
-      .text(0, 45, prizeConfig.value.toUpperCase(), {
+      .text(0, 0, prizeConfig.value.toUpperCase(), {
         font: "bold 16px Poppins",
         color: "#ffffff",
         align: "center",
         fontStyle: "bold",
         fontSize: "24px",
+        wordWrap: { width: cardWidth - 16, useAdvancedWrap: true },
       })
       .setOrigin(0.5);
+
+    const paddingY = 15;
+    const totalTextHeight = nameText.height + valueText.height + paddingY;
+
+    nameText.y = -totalTextHeight / 2 + 3;
+    valueText.y = nameText.y + nameText.height + paddingY;
 
     const cardContainer = scene.add.container(centerX, cardY, [
       cardBg,
@@ -105,14 +97,7 @@ export class StagePrizeDisplayComponent {
       delay: 180,
       ease: "Back.Out",
     });
-    scene.tweens.add({
-      targets: cardBg,
-      alpha: 1,
-      duration: 350,
-      delay: 180,
-      ease: "Back.Out",
-    });
 
-    return [displayPrizeBg, prizeImg, cardContainer, cardBg];
+    return [displayPrizeBg, prizeImg, cardContainer];
   }
 }

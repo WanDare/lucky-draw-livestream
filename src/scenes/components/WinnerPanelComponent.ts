@@ -1,13 +1,15 @@
 import Phaser from "phaser";
 import type { PrizeInfo } from "../model/lucky_draw_model";
 import { PrizeCardComponent } from "./PrizeCardComponent";
+import { createTitleStageLabel } from "./TitleStageLabel";
 
 export class WinnerPanelComponent {
   static show(
     scene: Phaser.Scene,
     prizes: PrizeInfo[],
     onNext: () => void,
-    stageLabelKey: string
+    title: string,
+    subtitles: string[]
   ): Phaser.GameObjects.GameObject[] {
     const gameWidth = scene.scale.width;
     const gameHeight = scene.scale.height;
@@ -17,9 +19,9 @@ export class WinnerPanelComponent {
     const panelWidth = gameWidth * 0.5;
     const panelHeight = gameHeight;
 
-    const columns = 3;
-    const cardWidth = gameWidth * 0.14;
-    const cardHeight = gameHeight * 0.063;
+    const columns = 4;
+    const cardWidth = gameWidth * 0.11;
+    const cardHeight = gameHeight * 0.058;
     const gap = gameWidth * 0.01;
     const labelHeight = gameHeight * 0.086;
     const labelWidth = gameWidth * 0.16;
@@ -56,15 +58,21 @@ export class WinnerPanelComponent {
     const posterImage = scene.add
       .image(posterX, posterY, "Poster")
       .setOrigin(0.5)
+      .setScale(1)
       .setDisplaySize(panelWidth, panelHeight)
       .setDepth(1301);
 
-    const stageLabelImage = scene.add
-      .image(panelX, currY + labelHeight / 2, stageLabelKey)
-      .setOrigin(0.5)
-      .setDisplaySize(labelWidth, labelHeight + 20)
-      .setDepth(1301)
-      .setAlpha(1);
+    const stageLabel = createTitleStageLabel(
+      scene,
+      panelX,
+      currY + labelHeight / 2,
+      title,
+      subtitles,
+      {
+        spacing: gameHeight * 0.012,
+        depth: 1301,
+      }
+    );
 
     currY += labelHeight + spacingAfterLabel;
 
@@ -108,12 +116,13 @@ export class WinnerPanelComponent {
       .setDisplaySize(nextBtnWidth, btnHeight)
       .setDepth(1301)
       .setAlpha(1)
+      .setScale(1)
       .setInteractive({ useHandCursor: true });
 
     const objects: Phaser.GameObjects.GameObject[] = [
       blurImage,
       posterImage,
-      stageLabelImage,
+      stageLabel, 
       container,
       nextBtnImage,
     ];

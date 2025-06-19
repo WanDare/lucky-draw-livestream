@@ -10,11 +10,25 @@ import { PopupComponent } from "../components/PopupComponent";
 import { DragMotionComponent } from "../components/DragMotionComponent";
 import { LightshowFrameComponent } from "../components/LightshowFrameComponent";
 import { WinnerPanelComponent } from "../components/WinnerPanelComponent";
+import {
+  createTitleStageLabel,
+  type TitlePart,
+} from "../components/TitleStageLabel";
 
-const stageLabelImages = [
-  "stage_label_giftbox",
-  "stage_label_aojiru",
-  "stage_label_iphone",
+const stageTitles = [
+  "អបអរសាទរអ្នកឈ្នះរង្វាន់",
+  "អបអរសាទរអ្នកឈ្នះរង្វាន់",
+  "អបអរសាទរអ្នកឈ្នះរង្វាន់",
+];
+const stageTitlesLevel = [
+  "វគ្គទី ១: ស្វែងរកអ្នកឈ្នះរង្វាន់",
+  "វគ្គទី ២: ស្វែងរកអ្នកឈ្នះរង្វាន់ ",
+  "វគ្គទី ៣: ស្វែងរកអ្នកឈ្នះរង្វាន់ ",
+];
+const subtitles = [
+  ["កាបូប Sakkin ចំនួន ២៤នាក់"],
+  ["ការញ្ញំា ស្តេចចាហួយសុខភាពរយៈពេល ១ឆ្នាំ (១២ប្រអប់)"],
+  ["Iphone 16 Pro Max ចំនួន 1 នាក់"],
 ];
 
 export const stageTitleImages = ["Stage1", "Stage2", "Stage3"];
@@ -51,15 +65,17 @@ export class LuckyDrawView {
   preload() {
     const images = [
       // Core and Background Images
-      ["background1", "assets/images/poster_thumbnail1.png"],
+      ["background1", "assets/images/poster_thumbnail.png"],
       ["background2", "assets/images/streaming_background.png"],
       ["Thumbnail", "assets/images/thumbnail.png"],
       ["Poster", "assets/images/poster.png"],
+      ["Pause", "assets/images/game_pause.png"],
       ["Gamescreen", "assets/images/lucky_game_main_bg.png"],
-      ["winner_blur_bg", "assets/images/blur2.png"],
+      ["winner_blur_bg", "assets/images/Blur3.png"],
       ["Ball", "assets/images/ticket_prize.png"],
       ["Congrat", "assets/images/popup_winner_screen.png"],
       ["card_bg", "assets/images/display_winner.png"],
+      ["Prize_card", "assets/images/price_cardbg.png"],
       ["Displayprize", "assets/images/display_prize.png"],
       ["People", "assets/images/people.png"],
       // Button
@@ -106,12 +122,14 @@ export class LuckyDrawView {
     this.background1 = this.scene.add
       .image(gameWidth * 0.25, gameHeight / 2, "background1")
       .setOrigin(0.5)
+      .setScale(1)
       .setDisplaySize(gameWidth * 0.5, gameHeight)
       .setDepth(-1);
 
     this.background2 = this.scene.add
       .image(gameWidth * 0.75, gameHeight / 2, "background2")
       .setOrigin(0.5)
+      .setScale(1)
       .setDisplaySize(gameWidth * 0.5, gameHeight)
       .setDepth(9);
 
@@ -142,6 +160,7 @@ export class LuckyDrawView {
       .setOrigin(0.5)
       .setDisplaySize(gameWidth * 0.1, gameHeight * 0.08)
       .setDepth(1)
+      .setScale(1)
       .setInteractive({ useHandCursor: false });
 
     this.isStartButtonDisabled = false;
@@ -371,7 +390,9 @@ export class LuckyDrawView {
     this.stagePrizeGraphics.forEach((g) => g.destroy());
 
     const stageIdx = this.stageWinners.length;
-    const stageLabelKey = stageLabelImages[stageIdx] || "stage_label_iphone";
+
+    const title = stageTitles[stageIdx] || "";
+    const stageSubtitles = subtitles[stageIdx] || [];
 
     this.stagePrizeGraphics = WinnerPanelComponent.show(
       this.scene,
@@ -381,7 +402,8 @@ export class LuckyDrawView {
         this.stagePrizeGraphics = [];
         onNext();
       },
-      stageLabelKey
+      title,
+      stageSubtitles
     );
 
     this.stageWinners.push([...prizes]);
@@ -397,18 +419,57 @@ export class LuckyDrawView {
   showStageLabel(stageIdx: number) {
     const gameWidth = this.scene.scale.width;
     const gameHeight = this.scene.scale.height;
-    const stageTitleKey = stageTitleImages[stageIdx] || "Stage1";
-    const image = this.scene.add
-      .image(gameWidth * 0.25, gameHeight * 0.42, stageTitleKey)
-      .setOrigin(0.5)
-      .setDepth(200)
-      .setDisplaySize(gameWidth * 0.22, gameHeight * 0.034);
+    const titleText = stageTitlesLevel[stageIdx] || "";
+    const subs = subtitles[stageIdx] || [];
+
+    const gradientColors = [
+      "#FFF7D5", // left
+      "#FFFFFF", // middle
+      "#FDF5DB", // right
+    ];
+
+    const titleLines: TitlePart[] = [
+      {
+        text: titleText,
+        fontSize: 28,
+        fontStyle: "bold",
+        fontFamily: "Kantumruy Pro",
+        stroke: "#765934",
+        strokeThickness: 2,
+        shadow: {
+          offsetX: 1,
+          offsetY: 2,
+          color: "#765934",
+          blur: 0,
+          stroke: true,
+          fill: true,
+        },
+        gradientColors,
+      },
+    ];
+
+    const label = createTitleStageLabel(
+      this.scene,
+      gameWidth * 0.25,
+      gameHeight * 0.42,
+      titleLines,
+      subs,
+      {
+        width: gameWidth * 0.22,
+        spacing: gameHeight * 0.005,
+        titleFontSize: 28,
+        subtitleFontSize: 16,
+        gradientColors: gradientColors,
+        depth: 200,
+      }
+    );
+
     this.scene.tweens.add({
-      targets: image,
+      targets: label,
       alpha: 0,
       delay: 1200,
       duration: 400,
-      onComplete: () => image.destroy(),
+      onComplete: () => label.destroy(),
     });
   }
 
@@ -454,11 +515,10 @@ export class LuckyDrawView {
     objects.push(posterImage);
 
     const labelHeight = gameHeight * 0.086;
-    const labelWidth = gameWidth * 0.16;
-    const spacingAfterLabel = gameHeight * 0.037;
+    const spacingAfterLabel = gameHeight * 0.014;
     const stageBlockPaddingY = gameHeight * 0.035;
     const CARD_W = gameWidth * 0.11;
-    const CARD_H = gameHeight * 0.048;
+    const CARD_H = gameHeight * 0.058;
     const GAP_X = gameWidth * 0.007;
     const GAP_Y = gameHeight * 0.01;
     const COLUMNS = 4;
@@ -469,19 +529,46 @@ export class LuckyDrawView {
 
     reversedStages.forEach((stage, i) => {
       const labelIndex = this.stageWinners.length - 1 - i;
-      const labelImageKey = stageLabelImages[labelIndex];
+      const titleText = stageTitles[labelIndex] || "";
+      const subs = subtitles[labelIndex] || [];
+      const titleLines: TitlePart[] = [
+        {
+          text: titleText,
+          fontSize: 28,
+          fontStyle: "bold",
+          fontFamily: "Kantumruy Pro",
+          stroke: "#765934",
+          strokeThickness: 2,
+          shadow: {
+            offsetX: 1,
+            offsetY: 2,
+            color: "#765934",
+            blur: 0,
+            stroke: true,
+            fill: true,
+          },
+        },
+      ];
 
-      if (labelImageKey && this.scene.textures.exists(labelImageKey)) {
-        const labelObj = this.scene.add
-          .image(panelX, currY + labelHeight / 2, labelImageKey)
-          .setOrigin(0.5)
-          .setDisplaySize(labelWidth, labelHeight + 20)
-          .setDepth(1502);
-        objects.push(labelObj);
-      }
+      const labelObj = createTitleStageLabel(
+        this.scene,
+        panelX,
+        currY + labelHeight / 2 - 10,
+        titleLines,
+        subs,
+        {
+          width: panelWidth * 0.9,
+          spacing: gameHeight * 0.01,
+          titleFontSize: 28,
+          subtitleFontSize: 18,
+          gradientColors: ["#FFF7D5", "#FFFFFF", "#FDF5DB"],
+          depth: 1502,
+        }
+      );
+      objects.push(labelObj);
+      currY += labelObj.height + spacingAfterLabel;
 
-      currY += labelHeight + spacingAfterLabel;
-
+      // --- Cards ---
       const cardsInStage = [...stage].reverse();
       const numCards = cardsInStage.length;
 
@@ -565,14 +652,14 @@ export class LuckyDrawView {
     const gameWidth = this.scene.scale.width;
     const gameHeight = this.scene.scale.height;
 
-    const columns = 3;
-    const cardWidth = gameWidth * 0.14;
-    const cardHeight = gameHeight * 0.063;
-    const gap = gameWidth * 0.007;
+    const columns = 4;
+    const cardWidth = gameWidth * 0.11;
+    const cardHeight = gameHeight * 0.058;
+    const gap = gameWidth * 0.0075;
     const cardSpacingX = cardWidth + gap;
     const cardSpacingY = cardHeight + gap;
 
-    const baseX = gameWidth * 0.6;
+    const baseX = gameWidth * 0.574;
     const baseY = gameHeight * 0.32;
 
     prizes.forEach((prize, i) => {

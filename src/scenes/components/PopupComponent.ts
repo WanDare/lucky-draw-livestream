@@ -3,7 +3,15 @@ import type { PrizeInfo } from "../model/lucky_draw_model";
 import { launchConfetti } from "../effects/confetti";
 
 function maskPhone(phone: string): string {
-  return phone.replace(/(\d{3}\s?\d{2})(\d{6})(\d{2})/, "$1XXXXXX$3");
+  const digits = phone.replace(/\D/g, "");
+
+  if (digits.length < 11) return phone;
+
+  const prefix = digits.slice(0, 5); // e.g., "85596"
+  const hidden = "XXXXXX";
+  const suffix = digits.slice(-2); // e.g., "45"
+
+  return `${prefix}${hidden}${suffix}`;
 }
 
 export class PopupComponent {
@@ -26,14 +34,15 @@ export class PopupComponent {
       .setDepth(2000)
       .setAlpha(0);
 
-    const nameFontSize = Math.max(20);
+    const nameFontSize = Math.max(18);
     const phoneFontSize = Math.max(28);
 
     const nameText = scene.add
-      .text(width / 2 + 50, height * 0.52, prize.name.toUpperCase(), {
-        font: `bold ${nameFontSize}px Arial`,
+      .text(width / 2 + 50, height * 0.525, prize.name.toUpperCase(), {
+        font: `${nameFontSize}px Arial`,
         color: "#538B3C",
         align: "center",
+        fontStyle: "normal",
         letterSpacing: -0.32,
       })
       .setOrigin(0.5)
@@ -43,7 +52,7 @@ export class PopupComponent {
     const phoneText = scene.add
       .text(
         width / 2 + 50,
-        height * 0.56,
+        height * 0.555,
         maskPhone(prize.phone.toUpperCase()),
         {
           font: `bold ${phoneFontSize}px Arial`,
@@ -160,8 +169,9 @@ export class PopupComponent {
       .setDepth(900);
 
     const panel = scene.add
-      .image(width / 2, height / 2, "card_bg")
+      .image(width / 2, height / 2, "Pause")
       .setOrigin(0.5)
+      .setScale(1)
       .setDisplaySize(width * 0.4, height * 0.25)
       .setDepth(901);
 

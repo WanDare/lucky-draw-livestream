@@ -3,6 +3,8 @@ import type { PrizeModel, PrizeInfo } from "../model/lucky_draw_model";
 import type { LuckyDrawView } from "../view/lucky_draw_view";
 import { PopupComponent } from "../components/PopupComponent";
 
+const GAME_STATE_VERSION = "v2";
+
 export class LuckyDrawController {
   private model: PrizeModel;
   private view: LuckyDrawView;
@@ -11,8 +13,8 @@ export class LuckyDrawController {
 
   private stages = [
     {
-      count: 18,
-      label: "Stage 1: ចាប់យកឲបាន 18 Ticket",
+      count: 24,
+      label: "Stage 1: ចាប់យកឲបាន 24 Ticket",
       winner: "អ្នកឈ្នះរង្វាន់",
     },
     {
@@ -28,7 +30,7 @@ export class LuckyDrawController {
   ];
 
   stagePrizes = [
-    { image: "Prize", name: "Gift Yellow Box", value: "18 ​​រង្វាន់" },
+    { image: "Prize", name: "Gift Yellow Box", value: "24 ​​រង្វាន់" },
     { image: "Prize2", name: "Sakkin Aojiru Box", value: "12 ​រង្វាន់" },
     { image: "Prize3", name: "IPHONE 16 PRO MAX", value: "1 ​​រង្វាន់" },
   ];
@@ -60,6 +62,7 @@ export class LuckyDrawController {
 
   private saveGameState() {
     const state = {
+      version: GAME_STATE_VERSION,
       currentStage: this.currentStage,
       prizes: this.model.getPrizes(),
       stageWinners: this.stageWinners,
@@ -72,6 +75,10 @@ export class LuckyDrawController {
     if (!raw) return;
     try {
       const state = JSON.parse(raw);
+      if (state.version !== GAME_STATE_VERSION) {
+        this.clearGameState();
+        return;
+      }
       this.currentStage = state.currentStage ?? 0;
       this.stageWinners = state.stageWinners ?? [];
       this.model.setPrizes(state.prizes ?? []);
@@ -134,7 +141,7 @@ export class LuckyDrawController {
 
   async fetchRandomPrizeInfo(): Promise<PrizeInfo> {
     const res = await fetch(
-      `${API_BASE_URL}/7f5f5d5f-168b-404c-bec0-d226ccc4763e`
+      `${API_BASE_URL}/c65aae6b-031e-427b-8fe7-64256ceee37c`
     );
     if (!res.ok) throw new Error("Failed to fetch prize info");
     const data = await res.json();

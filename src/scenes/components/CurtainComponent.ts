@@ -9,9 +9,6 @@ export class CurtainComponent {
   ) {
     const gameWidth = scene.scale.width;
 
-    // These percentages match the original hardcoded values (360, 310, 720) for a base width of 1440:
-    // 0, 310/1440 ≈ 0.215, 360/1440 = 0.25, 720/1440 = 0.5
-
     curtainLeft.setX(0).setVisible(true).setAlpha(1).setDepth(7);
     curtainRight
       .setX(gameWidth * 0.5)
