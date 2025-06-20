@@ -141,9 +141,7 @@ export class LuckyDrawController {
   }
 
   async fetchRandomPrizeInfo(): Promise<PrizeInfo> {
-    const res = await fetch(
-      `${API_BASE_URL}/c65aae6b-031e-427b-8fe7-64256ceee37c`
-    );
+    const res = await fetch(`${API_BASE_URL}/users`);
     if (!res.ok) throw new Error("Failed to fetch prize info");
     const data = await res.json();
     return Array.isArray(data)
