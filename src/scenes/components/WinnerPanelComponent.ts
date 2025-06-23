@@ -52,14 +52,18 @@ export class WinnerPanelComponent {
       .setDepth(1299)
       .setAlpha(1);
 
-    const posterX = gameWidth * 0.75;
-    const posterY = gameHeight / 2;
-    const posterImage = scene.add
-      .image(posterX, posterY, "Poster")
+    const background2 = scene.add
+      .image(gameWidth * 0.75, gameHeight / 2, "background2")
       .setOrigin(0.5)
       .setScale(1)
-      .setDisplaySize(panelWidth, panelHeight)
-      .setDepth(1301);
+      .setDisplaySize(gameWidth * 0.5, gameHeight)
+      .setDepth(9);
+
+    const posterReward = scene.add
+      .image(gameWidth * 0.75, gameHeight / 2, "PosterReward")
+      .setOrigin(0.5)
+      .setDisplaySize(516, 516)
+      .setDepth(10);
 
     const stageLabel = createTitleStageLabel(
       scene,
@@ -120,7 +124,8 @@ export class WinnerPanelComponent {
 
     const objects: Phaser.GameObjects.GameObject[] = [
       blurImage,
-      posterImage,
+      background2,
+      posterReward,
       stageLabel,
       container,
       nextBtnImage,

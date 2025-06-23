@@ -45,6 +45,7 @@ export class LuckyDrawView {
   prizenetopen!: Phaser.GameObjects.Image | null;
   people!: Phaser.GameObjects.Image | null;
   thumbnail!: Phaser.GameObjects.Image;
+  thumbnailTitle!: Phaser.GameObjects.Image;
   curtainOpen!: Phaser.GameObjects.Image;
   curtainLeft!: Phaser.GameObjects.Image;
   curtainRight!: Phaser.GameObjects.Image;
@@ -73,6 +74,8 @@ export class LuckyDrawView {
       ["background2", "assets/images/streaming_background.png"],
       ["Thumbnail", "assets/images/thumbnail.png"],
       ["Poster", "assets/images/poster.png"],
+      ["PosterReward", "assets/images/poster_reward.png"],
+      ["PosterTitle", "assets/images/poster_title.png"],
       ["Pause", "assets/images/game_pause.png"],
       ["Gamescreen", "assets/images/lucky_game_main_bg.png"],
       ["winner_blur_bg", "assets/images/Blur3.png"],
@@ -86,6 +89,7 @@ export class LuckyDrawView {
       // Button
       ["Start", "assets/images/start_button.png"],
       ["Next", "assets/images/next_button.png"],
+      ["End", "assets/images/end_button.png"],
       ["BackMenu", "assets/images/back_to_menu.png"],
       // Display Prizes item
       ["Prize", "assets/images/prizes/prize7.png"],
@@ -125,7 +129,7 @@ export class LuckyDrawView {
     const gameHeight = this.scene.scale.height;
 
     this.background1 = this.scene.add
-      .image(gameWidth * 0.25, gameHeight / 2, "background1")
+      .image(gameWidth * 0.25, gameHeight / 2, "winner_blur_bg")
       .setOrigin(0.5)
       .setScale(1)
       .setDisplaySize(gameWidth * 0.5, gameHeight)
@@ -155,9 +159,15 @@ export class LuckyDrawView {
       .setVisible(false);
 
     this.thumbnail = this.scene.add
-      .image(gameWidth * 0.25, gameHeight / 2, "Thumbnail")
+      .image(gameWidth * 0.25, gameHeight / 2 + 148, "PosterReward")
       .setOrigin(0.5)
-      .setDisplaySize(gameWidth * 0.36, gameHeight * 0.71)
+      .setDisplaySize(516, 516)
+      .setDepth(1);
+
+    this.thumbnailTitle = this.scene.add
+      .image(gameWidth * 0.25, 148 + 155 / 2, "PosterTitle")
+      .setOrigin(0.5)
+      .setDisplaySize(369, 155)
       .setDepth(1);
 
     this.startButton = this.scene.add
@@ -512,12 +522,20 @@ export class LuckyDrawView {
 
     const posterX = gameWidth * 0.75;
     const posterY = gameHeight / 2;
-    const posterImage = this.scene.add
-      .image(posterX, posterY, "Poster")
+    const background2 = this.scene.add
+      .image(gameWidth * 0.75, gameHeight / 2, "background2")
       .setOrigin(0.5)
-      .setDisplaySize(panelWidth, panelHeight)
-      .setDepth(1501);
-    objects.push(posterImage);
+      .setScale(1)
+      .setDisplaySize(gameWidth * 0.5, gameHeight)
+      .setDepth(9);
+    objects.push(background2);
+
+    const posterReward = this.scene.add
+      .image(gameWidth * 0.75, gameHeight / 2, "PosterReward")
+      .setOrigin(0.5)
+      .setDisplaySize(516, 516)
+      .setDepth(10);
+    objects.push(posterReward);
 
     const labelHeight = gameHeight * 0.086;
     const spacingAfterLabel = gameHeight * 0.014;

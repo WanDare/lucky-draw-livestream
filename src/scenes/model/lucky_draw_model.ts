@@ -2,6 +2,7 @@ export interface PrizeInfo {
   phone: any;
   id: number;
   name: string;
+  description: string;
 }
 
 export class PrizeModel {
@@ -20,6 +21,6 @@ export class PrizeModel {
   }
 
   setPrizes(prizes: PrizeInfo[]) {
-    this.collected = [...prizes]; // safely copy
+    this.collected = [...prizes];
   }
 }

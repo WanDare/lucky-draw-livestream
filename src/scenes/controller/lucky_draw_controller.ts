@@ -141,12 +141,45 @@ export class LuckyDrawController {
   }
 
   async fetchRandomPrizeInfo(): Promise<PrizeInfo> {
-    const res = await fetch(`${API_BASE_URL}/users`);
+    const res = await fetch(
+      `${API_BASE_URL}/contest/winners?pageNumber=1&pageSize=10&searchString=`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
     if (!res.ok) throw new Error("Failed to fetch prize info");
-    const data = await res.json();
-    return Array.isArray(data)
-      ? data[Math.floor(Math.random() * data.length)]
-      : data;
+
+    const response = await res.json();
+    const prizes: PrizeInfo[] = Array.isArray(response.data)
+      ? response.data
+      : [];
+
+    if (prizes.length === 0) throw new Error("No prize info available");
+
+    const selectedPrize = prizes[Math.floor(Math.random() * prizes.length)];
+
+    const submitRes = await fetch(`${API_BASE_URL}/contest/random-winner`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: selectedPrize.name,
+        phone: selectedPrize.phone,
+        description: selectedPrize.description,
+        stage: this.currentStage + 1,
+      }),
+    });
+
+    if (!submitRes.ok) {
+      const errorText = await submitRes.text();
+      throw new Error(`Failed to submit winner: ${errorText}`);
+    }
+
+    return selectedPrize;
   }
 
   startInfiniteBallDrop() {
