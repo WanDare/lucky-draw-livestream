@@ -17,6 +17,7 @@
     "vite-plugin-compression": "^0.5.1"
   },
   "dependencies": {
+    "node-fetch": "^3.3.2",
     "phaser": "^3.90.0"
   }
 }

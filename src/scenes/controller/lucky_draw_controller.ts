@@ -10,6 +10,7 @@ export class LuckyDrawController {
   private view: LuckyDrawView;
   private scene: Phaser.Scene;
   private isCollectingPrize = false;
+  private allWinners: PrizeInfo[] = [];
 
   private stages = [
     {
@@ -56,6 +57,19 @@ export class LuckyDrawController {
     };
   }
 
+  private async preloadAllWinners() {
+    try {
+      const res = await fetch(`${API_BASE_URL}/members`);
+      const json = await res.json();
+      this.allWinners = Array.isArray(json.data) ? json.data : [];
+      if (!this.allWinners.length) throw new Error("No data from API");
+    } catch (err) {
+      console.warn("⚠️ API failed, loading from fallback static file...");
+      const fallback = await fetch("data/winners.json");
+      this.allWinners = await fallback.json();
+    }
+  }
+
   private hasSavedGame(): boolean {
     return !!localStorage.getItem("luckyDrawState");
   }
@@ -71,9 +85,9 @@ export class LuckyDrawController {
   }
 
   private loadGameState() {
-    const raw = localStorage.getItem("luckyDrawState");
-    if (!raw) return;
     try {
+      const raw = localStorage.getItem("luckyDrawState");
+      if (!raw) return;
       const state = JSON.parse(raw);
       if (state.version !== GAME_STATE_VERSION) {
         this.clearGameState();
@@ -91,7 +105,9 @@ export class LuckyDrawController {
     localStorage.removeItem("luckyDrawState");
   }
 
-  onStartGame() {
+  async onStartGame() {
+    await this.preloadAllWinners(); // 🔁 Fetch and cache once
+
     if (this.hasSavedGame()) {
       PopupComponent.showConfirm(
         this.scene,
@@ -129,9 +145,8 @@ export class LuckyDrawController {
 
   startStage(stageIdx: number) {
     this.clearAllBalls();
-    if (this.model.getPrizes().length === 0) {
-      this.model.clearPrizes();
-    }
+    if (this.model.getPrizes().length === 0) this.model.clearPrizes();
+
     const stageCount = this.stages[this.currentStage].count;
     this.view.renderPrizePanel(this.model.getPrizes(), stageCount);
     this.maxCollect = this.stages[stageIdx].count;
@@ -141,31 +156,27 @@ export class LuckyDrawController {
   }
 
   async fetchRandomPrizeInfo(): Promise<PrizeInfo> {
-    const res = await fetch(
-      `${API_BASE_URL}/contest/winners?pageNumber=1&pageSize=10&searchString=`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
+    const usedPhones = new Set(this.model.getPrizes().map((p) => p.phone));
+
+    const availableWinners = this.allWinners.filter(
+      (w) => !usedPhones.has(w.phone)
     );
 
-    if (!res.ok) throw new Error("Failed to fetch prize info");
+    if (availableWinners.length === 0)
+      throw new Error("No available winners left");
 
-    const response = await res.json();
-    const prizes: PrizeInfo[] = Array.isArray(response.data)
-      ? response.data
-      : [];
+    const index = Math.floor(Math.random() * availableWinners.length);
+    const selectedPrize = availableWinners[index];
 
-    if (prizes.length === 0) throw new Error("No prize info available");
+    // Remove winner from allWinners permanently
+    this.allWinners = this.allWinners.filter(
+      (w) => w.phone !== selectedPrize.phone
+    );
 
-    const selectedPrize = prizes[Math.floor(Math.random() * prizes.length)];
-
+    // Submit winner
     const submitRes = await fetch(`${API_BASE_URL}/contest/random-winner`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         name: selectedPrize.name,
         phone: selectedPrize.phone,
@@ -233,8 +244,10 @@ export class LuckyDrawController {
         this.model.getPrizes().length >= this.maxCollect
       )
         return;
+
       this.isCollectingPrize = true;
       ball.disableInteractive();
+
       try {
         const prize = await this.fetchRandomPrizeInfo();
         this.collectPrizeWithAnimation(ball, prize);

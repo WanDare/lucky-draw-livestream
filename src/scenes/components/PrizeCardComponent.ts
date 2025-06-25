@@ -2,14 +2,22 @@ import Phaser from "phaser";
 import type { PrizeInfo } from "../model/lucky_draw_model";
 
 function maskPhone(phone: string): string {
-  const digits = phone.replace(/\D/g, ""); 
+  const digits = phone.replace(/\D/g, "");
   if (digits.length < 11) return phone;
 
   const country = digits.slice(0, 3);
-  const operator = digits.slice(3, 5); 
-  const suffix = digits.slice(-2); 
+  const operator = digits.slice(3, 5);
+  const suffix = digits.slice(-2);
 
   return `${country} ${operator}XXXXXX${suffix}`;
+}
+
+function isKhmer(text: string): boolean {
+  return /[\u1780-\u17FF]/.test(text);
+}
+
+function truncateText(text: string, maxLength: number): string {
+  return text.length > maxLength ? text.slice(0, maxLength - 3) + "..." : text;
 }
 
 export class PrizeCardComponent {
@@ -32,14 +40,17 @@ export class PrizeCardComponent {
       .setDisplaySize(width, height)
       .setOrigin(0.5);
 
+    const isKhmerName = isKhmer(prize.name);
+    const nameFont = isKhmerName ? "Kantumruy Pro" : "Poppins";
+    let displayName = isKhmerName ? prize.name : prize.name.toUpperCase();
+    displayName = truncateText(displayName, 18);
+
     const nameText = scene.add
-      .text(0, 0, prize.name.toUpperCase(), {
-        font: `${nameFontSize}px Poppins`,
+      .text(0, 0, displayName, {
+        font: `${nameFontSize}px ${nameFont}`,
         color: "#ffffff",
         align: "center",
         fontStyle: "400",
-        fontFamily: "Poppins",
-        letterSpacing: -0.24,
         wordWrap: { width: width - 2 * paddingX, useAdvancedWrap: true },
       })
       .setOrigin(0.5, 0);

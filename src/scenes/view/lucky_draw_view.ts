@@ -409,6 +409,8 @@ export class LuckyDrawView {
     const title = stageTitles[stageIdx] || "";
     const stageSubtitles = subtitles[stageIdx] || [];
 
+    const isLastStage = stageIdx === stageTitles.length - 1;
+
     this.stagePrizeGraphics = WinnerPanelComponent.show(
       this.scene,
       prizes,
@@ -418,7 +420,8 @@ export class LuckyDrawView {
         onNext();
       },
       title,
-      stageSubtitles
+      stageSubtitles,
+      isLastStage 
     );
 
     this.stageWinners.push([...prizes]);
@@ -520,8 +523,6 @@ export class LuckyDrawView {
       .setAlpha(1);
     objects.push(blurImage);
 
-    const posterX = gameWidth * 0.75;
-    const posterY = gameHeight / 2;
     const background2 = this.scene.add
       .image(gameWidth * 0.75, gameHeight / 2, "background2")
       .setOrigin(0.5)

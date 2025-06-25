@@ -9,7 +9,8 @@ export class WinnerPanelComponent {
     prizes: PrizeInfo[],
     onNext: () => void,
     title: string,
-    subtitles: string[]
+    subtitles: string[],
+    isLastStage: boolean // ✅ NEW PARAM
   ): Phaser.GameObjects.GameObject[] {
     const gameWidth = scene.scale.width;
     const gameHeight = scene.scale.height;
@@ -113,8 +114,10 @@ export class WinnerPanelComponent {
 
     currY += gridHeight + spacingAfterGrid;
 
+    // ✅ Set button key based on last stage
+    const nextBtnKey = isLastStage ? "End" : "Next";
     const nextBtnImage = scene.add
-      .image(panelX, currY + btnHeight / 2, "Next")
+      .image(panelX, currY + btnHeight / 2, nextBtnKey)
       .setOrigin(0.5)
       .setDisplaySize(nextBtnWidth, btnHeight)
       .setDepth(1301)

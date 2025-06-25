@@ -7,11 +7,19 @@ function maskPhone(phone: string): string {
 
   if (digits.length < 11) return phone;
 
-  const prefix = digits.slice(0, 5); // e.g., "85596"
+  const prefix = digits.slice(0, 5);
   const hidden = "XXXXXX";
-  const suffix = digits.slice(-2); // e.g., "45"
+  const suffix = digits.slice(-2);
 
   return `${prefix}${hidden}${suffix}`;
+}
+
+function isKhmer(text: string): boolean {
+  return /[\u1780-\u17FF]/.test(text);
+}
+
+function truncateText(text: string, maxLength: number): string {
+  return text.length > maxLength ? text.slice(0, maxLength - 3) + "..." : text;
 }
 
 export class PopupComponent {
@@ -37,13 +45,19 @@ export class PopupComponent {
     const nameFontSize = Math.max(18);
     const phoneFontSize = Math.max(28);
 
+    const isKhmerName = isKhmer(prize.name);
+    const nameFont = isKhmerName ? "Kantumruy Pro" : "Poppins";
+
+    let displayName = isKhmerName ? prize.name : prize.name.toUpperCase();
+    displayName = truncateText(displayName, 20);
+
     const nameText = scene.add
-      .text(width / 2 + 50, height * 0.525, prize.name.toUpperCase(), {
-        font: `${nameFontSize}px Arial`,
+      .text(width / 2 + 50, height * 0.525, displayName, {
+        font: `${nameFontSize}px ${nameFont}`,
         color: "#538B3C",
         align: "center",
-        fontStyle: "normal",
-        letterSpacing: -0.32,
+        fontStyle: "400",
+        wordWrap: { width: width * 0.3, useAdvancedWrap: true },
       })
       .setOrigin(0.5)
       .setDepth(2001)
