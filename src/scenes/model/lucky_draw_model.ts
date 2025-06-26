@@ -1,13 +1,12 @@
 export interface PrizeInfo {
   phone: any;
-  id: number;
-  name: string;
-  description: string;
+  name: any;
+  ticket: number;
 }
 
 export class PrizeModel {
   private collected: PrizeInfo[] = [];
-  private preloadedWinners: PrizeInfo[] = []; 
+  private preloadedWinners: PrizeInfo[] = [];
 
   // ✅ Add prize during gameplay
   addPrize(prize: PrizeInfo) {
@@ -36,8 +35,10 @@ export class PrizeModel {
     return this.preloadedWinners;
   }
 
-  // ✅ (Optional) Remove already-picked winner to prevent reuse
-  removePreloadedWinnerById(id: number) {
-    this.preloadedWinners = this.preloadedWinners.filter((p) => p.id !== id);
+  // ✅ Remove a winner by phone number to prevent reuse
+  removePreloadedWinnerByPhone(phone: any) {
+    this.preloadedWinners = this.preloadedWinners.filter(
+      (p) => p.phone !== phone
+    );
   }
 }

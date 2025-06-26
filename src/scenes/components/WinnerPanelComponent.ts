@@ -22,7 +22,7 @@ export class WinnerPanelComponent {
 
     const columns = 4;
     const cardWidth = gameWidth * 0.11;
-    const cardHeight = gameHeight * 0.058;
+    const cardHeight = 72;
     const gap = gameWidth * 0.01;
     const labelHeight = gameHeight * 0.086;
     const spacingAfterLabel = gameHeight * 0.024;

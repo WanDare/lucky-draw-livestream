@@ -57,16 +57,35 @@ export class LuckyDrawController {
     };
   }
 
+  // private async preloadAllWinners() {
+  //   try {
+  //     const res = await fetch(`${API_BASE_URL}/members`);
+  //     const json = await res.json();
+  //     this.allWinners = Array.isArray(json.data) ? json.data : [];
+  //     if (!this.allWinners.length) throw new Error("No data from API");
+  //   } catch (err) {
+  //     console.warn("⚠️ API failed, loading from fallback static file...");
+  //     const fallback = await fetch("data/winners.json");
+  //     this.allWinners = await fallback.json();
+  //   }
+  // }
+
   private async preloadAllWinners() {
     try {
-      const res = await fetch(`${API_BASE_URL}/members`);
-      const json = await res.json();
-      this.allWinners = Array.isArray(json.data) ? json.data : [];
-      if (!this.allWinners.length) throw new Error("No data from API");
+      const res = await fetch("data/tickets.json");
+      if (!res.ok) throw new Error("Failed to load ticket data");
+
+      const data = await res.json();
+      const winners: PrizeInfo[] = data.map((entry: any) => ({
+        name: entry.name,
+        phone: String(entry.phone),
+        ticket: entry.ticket,
+      }));
+
+      this.model.setPreloadedWinners(winners);
+      console.log("✅ Top ticket winners loaded", winners);
     } catch (err) {
-      console.warn("⚠️ API failed, loading from fallback static file...");
-      const fallback = await fetch("data/winners.json");
-      this.allWinners = await fallback.json();
+      console.error("❌ Failed to load top ticket winners", err);
     }
   }
 
@@ -106,7 +125,8 @@ export class LuckyDrawController {
   }
 
   async onStartGame() {
-    await this.preloadAllWinners(); // 🔁 Fetch and cache once
+    await this.preloadAllWinners();
+    this.allWinners = this.model.getPreloadedWinners();
 
     if (this.hasSavedGame()) {
       PopupComponent.showConfirm(
@@ -180,7 +200,6 @@ export class LuckyDrawController {
       body: JSON.stringify({
         name: selectedPrize.name,
         phone: selectedPrize.phone,
-        description: selectedPrize.description,
         stage: this.currentStage + 1,
       }),
     });

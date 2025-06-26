@@ -67,7 +67,7 @@ export class PopupComponent {
       .text(
         width / 2 + 50,
         height * 0.555,
-        maskPhone(prize.phone.toUpperCase()),
+        maskPhone(String(prize.phone).toUpperCase()),
         {
           font: `bold ${phoneFontSize}px Arial`,
           color: "#538B3C",

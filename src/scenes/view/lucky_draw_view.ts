@@ -421,7 +421,7 @@ export class LuckyDrawView {
       },
       title,
       stageSubtitles,
-      isLastStage 
+      isLastStage
     );
 
     this.stageWinners.push([...prizes]);
@@ -678,7 +678,7 @@ export class LuckyDrawView {
 
     const columns = 4;
     const cardWidth = gameWidth * 0.11;
-    const cardHeight = gameHeight * 0.058;
+    const cardHeight = 72;
     const gap = gameWidth * 0.0075;
     const cardSpacingX = cardWidth + gap;
     const cardSpacingY = cardHeight + gap;
