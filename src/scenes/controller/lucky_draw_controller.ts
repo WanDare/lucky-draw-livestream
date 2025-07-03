@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "../utils/constants";
+// import { API_BASE_URL } from "../utils/constants";
 import type { PrizeModel, PrizeInfo } from "../model/lucky_draw_model";
 import type { LuckyDrawView } from "../view/lucky_draw_view";
 import { PopupComponent } from "../components/PopupComponent";
@@ -193,21 +193,11 @@ export class LuckyDrawController {
       (w) => w.phone !== selectedPrize.phone
     );
 
-    // Submit winner
-    const submitRes = await fetch(`${API_BASE_URL}/contest/random-winner`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: selectedPrize.name,
-        phone: selectedPrize.phone,
-        stage: this.currentStage + 1,
-      }),
+    console.log("✅ Simulated winner submission:", {
+      name: selectedPrize.name,
+      phone: selectedPrize.phone,
+      stage: this.currentStage + 1,
     });
-
-    if (!submitRes.ok) {
-      const errorText = await submitRes.text();
-      throw new Error(`Failed to submit winner: ${errorText}`);
-    }
 
     return selectedPrize;
   }
